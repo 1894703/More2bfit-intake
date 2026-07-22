@@ -23,6 +23,7 @@
 <meta name="twitter:description" content="Bereken in twee minuten je dagelijkse caloriedoel en start gezond en haalbaar met afvallen." />
 <meta name="twitter:image" content="https://jouwaccount.github.io/calorieboek/og-image.jpg" />
 
+<script src="./jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <style>
@@ -41,6 +42,7 @@
   .grid { display: grid; }
   .flex-1 { flex: 1 1 0%; }
   .flex-col { flex-direction: column; }
+  .flex-wrap { flex-wrap: wrap; }
   .flex-shrink-0 { flex-shrink: 0; }
   .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .gap-1 { gap: .25rem; }
@@ -163,6 +165,172 @@ const ACTIVITEITEN = [
     { key: "actief", label: "6–7x per week intensief sporten", factor: 1.725 },
     { key: "zwaar", label: "Zeer zwaar lichamelijk werk of dagelijks sporten", factor: 1.9 },
 ];
+const ALLERGENEN = [
+    { key: "zuivel", label: "Lactose-intolerantie" },
+    { key: "gluten", label: "Gluten-allergie" },
+    { key: "noten", label: "Notenallergie" },
+    { key: "ei", label: "Ei-allergie" },
+    { key: "schaaldieren", label: "Schaaldierenallergie" },
+    { key: "soja", label: "Soja-allergie" },
+];
+const AFKEUREN = [
+    { key: "zuivel", label: "Geen zuivel" },
+    { key: "vis", label: "Geen vis" },
+    { key: "schaaldieren", label: "Geen schaaldieren" },
+    { key: "rood_vlees", label: "Geen rood vlees" },
+    { key: "varkensvlees", label: "Geen varkensvlees" },
+    { key: "kip", label: "Geen kip" },
+    { key: "ei", label: "Geen ei" },
+    { key: "soja", label: "Geen soja" },
+    { key: "noten", label: "Geen noten" },
+];
+const INGREDIENTEN = {
+    havermout: { naam: "Havermout", kcal: 389, eiwit: 16.9, kh: 66.3, vet: 6.9, tags: [] },
+    halfvolle_melk: { naam: "Halfvolle melk", kcal: 46, eiwit: 3.4, kh: 4.7, vet: 1.5, tags: ["zuivel"] },
+    amandelmelk: { naam: "Amandelmelk", kcal: 13, eiwit: 0.5, kh: 0.3, vet: 1.1, tags: ["noten"] },
+    sojamelk: { naam: "Sojamelk", kcal: 33, eiwit: 3.3, kh: 0.8, vet: 1.8, tags: ["soja"] },
+    griekse_yoghurt: { naam: "Griekse yoghurt", kcal: 97, eiwit: 9, kh: 4, vet: 5, tags: ["zuivel"] },
+    kokosyoghurt: { naam: "Kokosyoghurt", kcal: 90, eiwit: 1, kh: 6, vet: 7, tags: [] },
+    magere_kwark: { naam: "Magere kwark", kcal: 60, eiwit: 12, kh: 4, vet: 0.2, tags: ["zuivel"] },
+    ei: { naam: "Ei", kcal: 155, eiwit: 13, kh: 1.1, vet: 11, tags: ["ei"] },
+    volkoren_brood: { naam: "Volkoren brood", kcal: 250, eiwit: 9, kh: 41, vet: 3.5, tags: ["gluten"] },
+    glutenvrij_brood: { naam: "Glutenvrij brood", kcal: 240, eiwit: 5, kh: 47, vet: 3, tags: [] },
+    roggebrood: { naam: "Roggebrood", kcal: 220, eiwit: 6.5, kh: 42, vet: 1.5, tags: ["gluten"] },
+    rijstwafels: { naam: "Rijstwafels", kcal: 387, eiwit: 8, kh: 81, vet: 3, tags: [] },
+    boter: { naam: "Boter", kcal: 717, eiwit: 0.9, kh: 0.1, vet: 81, tags: ["zuivel"] },
+    olijfolie: { naam: "Olijfolie", kcal: 884, eiwit: 0, kh: 0, vet: 100, tags: [] },
+    pindakaas: { naam: "Pindakaas", kcal: 588, eiwit: 25, kh: 20, vet: 50, tags: ["noten"] },
+    amandelen: { naam: "Amandelen", kcal: 579, eiwit: 21, kh: 22, vet: 50, tags: ["noten"] },
+    walnoten: { naam: "Walnoten", kcal: 654, eiwit: 15, kh: 14, vet: 65, tags: ["noten"] },
+    honing: { naam: "Honing", kcal: 304, eiwit: 0.3, kh: 82, vet: 0, tags: [] },
+    banaan: { naam: "Banaan", kcal: 89, eiwit: 1.1, kh: 23, vet: 0.3, tags: [] },
+    appel: { naam: "Appel", kcal: 52, eiwit: 0.3, kh: 14, vet: 0.2, tags: [] },
+    blauwe_bessen: { naam: "Blauwe bessen", kcal: 57, eiwit: 0.7, kh: 14, vet: 0.3, tags: [] },
+    spinazie: { naam: "Spinazie", kcal: 23, eiwit: 2.9, kh: 3.6, vet: 0.4, tags: [] },
+    broccoli: { naam: "Broccoli", kcal: 34, eiwit: 2.8, kh: 7, vet: 0.4, tags: [] },
+    zoete_aardappel: { naam: "Zoete aardappel", kcal: 86, eiwit: 1.6, kh: 20, vet: 0.1, tags: [] },
+    aardappel: { naam: "Aardappel", kcal: 77, eiwit: 2, kh: 17, vet: 0.1, tags: [] },
+    zilvervliesrijst: { naam: "Zilvervliesrijst (gekookt)", kcal: 123, eiwit: 2.6, kh: 25.8, vet: 1, tags: [] },
+    quinoa: { naam: "Quinoa (gekookt)", kcal: 120, eiwit: 4.4, kh: 21.3, vet: 1.9, tags: [] },
+    linzen: { naam: "Linzen (gekookt)", kcal: 116, eiwit: 9, kh: 20, vet: 0.4, tags: [] },
+    kikkererwten: { naam: "Kikkererwten (gekookt)", kcal: 164, eiwit: 8.9, kh: 27.4, vet: 2.6, tags: [] },
+    avocado: { naam: "Avocado", kcal: 160, eiwit: 2, kh: 8.5, vet: 14.7, tags: [] },
+    tomaat: { naam: "Tomaat", kcal: 18, eiwit: 0.9, kh: 3.9, vet: 0.2, tags: [] },
+    komkommer: { naam: "Komkommer", kcal: 15, eiwit: 0.7, kh: 3.6, vet: 0.1, tags: [] },
+    paprika: { naam: "Paprika", kcal: 31, eiwit: 1, kh: 6, vet: 0.3, tags: [] },
+    ui: { naam: "Ui", kcal: 40, eiwit: 1.1, kh: 9.3, vet: 0.1, tags: [] },
+    knoflook: { naam: "Knoflook", kcal: 149, eiwit: 6.4, kh: 33, vet: 0.5, tags: [] },
+    kipfilet: { naam: "Kipfilet", kcal: 165, eiwit: 31, kh: 0, vet: 3.6, tags: ["kip"] },
+    zalm: { naam: "Zalm", kcal: 208, eiwit: 20, kh: 0, vet: 13, tags: ["vis"] },
+    tonijn: { naam: "Tonijn (blik, op water)", kcal: 116, eiwit: 26, kh: 0, vet: 1, tags: ["vis"] },
+    garnalen: { naam: "Garnalen", kcal: 99, eiwit: 24, kh: 0.2, vet: 0.3, tags: ["schaaldieren"] },
+    rundergehakt: { naam: "Rundergehakt (mager)", kcal: 176, eiwit: 20, kh: 0, vet: 10, tags: ["rood_vlees"] },
+    tofu: { naam: "Tofu", kcal: 76, eiwit: 8, kh: 1.9, vet: 4.8, tags: ["soja"] },
+    edamame: { naam: "Edamame", kcal: 121, eiwit: 11, kh: 10, vet: 5, tags: ["soja"] },
+    feta: { naam: "Feta", kcal: 264, eiwit: 14, kh: 4, vet: 21, tags: ["zuivel"] },
+    hummus: { naam: "Hummus", kcal: 166, eiwit: 8, kh: 14, vet: 10, tags: [] },
+    chiazaad: { naam: "Chiazaad", kcal: 486, eiwit: 17, kh: 42, vet: 31, tags: [] },
+    volkoren_pasta: { naam: "Volkoren pasta (gekookt)", kcal: 124, eiwit: 5, kh: 25, vet: 1.1, tags: ["gluten"] },
+    glutenvrije_pasta: { naam: "Glutenvrije pasta (gekookt)", kcal: 130, eiwit: 2.7, kh: 28, vet: 0.6, tags: [] },
+};
+const RECEPTEN = {
+    ontbijt: [
+        { id: "o1", naam: "Havermout met blauwe bessen en amandelen", basis: [{ ing: "havermout", gram: 60 }, { ing: "halfvolle_melk", gram: 200 }, { ing: "blauwe_bessen", gram: 50 }, { ing: "amandelen", gram: 15 }, { ing: "honing", gram: 10 }], bereiding: ["Kook de havermout 5 minuten in de melk tot een romige pap.", "Schep over in een kom en top af met blauwe bessen, amandelen en honing."] },
+        { id: "o2", naam: "Griekse yoghurt bowl met banaan en walnoten", basis: [{ ing: "griekse_yoghurt", gram: 200 }, { ing: "banaan", gram: 100 }, { ing: "walnoten", gram: 15 }, { ing: "honing", gram: 10 }], bereiding: ["Schep de yoghurt in een kom.", "Snijd de banaan in plakjes en verdeel samen met de walnoten erover.", "Besprenkel met honing."] },
+        { id: "o3", naam: "Roerei met spinazie op volkoren brood", basis: [{ ing: "ei", gram: 150 }, { ing: "spinazie", gram: 50 }, { ing: "volkoren_brood", gram: 60 }, { ing: "boter", gram: 10 }], bereiding: ["Verhit de boter in een pan en fruit de spinazie kort aan.", "Klop de eieren los en roerbak tot roerei.", "Serveer op geroosterd volkoren brood."] },
+        { id: "o4", naam: "Kwark met appel en chiazaad", basis: [{ ing: "magere_kwark", gram: 200 }, { ing: "appel", gram: 100 }, { ing: "honing", gram: 10 }, { ing: "chiazaad", gram: 10 }], bereiding: ["Snijd de appel in blokjes.", "Meng door de kwark samen met chiazaad en honing."] },
+        { id: "o5", naam: "Glutenvrije toast met avocado en ei", basis: [{ ing: "glutenvrij_brood", gram: 70 }, { ing: "avocado", gram: 80 }, { ing: "ei", gram: 100 }, { ing: "tomaat", gram: 50 }], bereiding: ["Rooster het glutenvrije brood.", "Prak de avocado erop en verkruimel er zout en peper over.", "Serveer met een gekookt of gepocheerd ei en plakjes tomaat."] },
+        { id: "o6", naam: "Soja-smoothiebowl met pindakaas", basis: [{ ing: "sojamelk", gram: 150 }, { ing: "banaan", gram: 120 }, { ing: "blauwe_bessen", gram: 50 }, { ing: "chiazaad", gram: 15 }, { ing: "pindakaas", gram: 15 }], bereiding: ["Blend de sojamelk met de helft van de banaan tot een dikke smoothie.", "Giet in een kom en top af met de rest van de banaan, bessen, chiazaad en pindakaas."] },
+    ],
+    lunch: [
+        { id: "l1", naam: "Volkoren brood met kipfilet en avocado", basis: [{ ing: "volkoren_brood", gram: 90 }, { ing: "kipfilet", gram: 100 }, { ing: "avocado", gram: 60 }, { ing: "tomaat", gram: 50 }, { ing: "komkommer", gram: 50 }], bereiding: ["Beleg het brood met plakjes kipfilet en avocado.", "Werk af met plakjes tomaat en komkommer."] },
+        { id: "l2", naam: "Griekse salade met feta en roggebrood", basis: [{ ing: "feta", gram: 70 }, { ing: "tomaat", gram: 150 }, { ing: "komkommer", gram: 100 }, { ing: "olijfolie", gram: 15 }, { ing: "roggebrood", gram: 60 }], bereiding: ["Snijd tomaat en komkommer in blokjes en meng met verkruimelde feta.", "Besprenkel met olijfolie en serveer met roggebrood."] },
+        { id: "l3", naam: "Quinoa bowl met kikkererwten, feta en groenten", basis: [{ ing: "quinoa", gram: 150 }, { ing: "kikkererwten", gram: 100 }, { ing: "paprika", gram: 80 }, { ing: "spinazie", gram: 40 }, { ing: "olijfolie", gram: 10 }, { ing: "feta", gram: 40 }], bereiding: ["Meng de gekookte quinoa met kikkererwten, paprika en spinazie.", "Werk af met verkruimelde feta en een scheutje olijfolie."] },
+        { id: "l4", naam: "Tonijnsalade met volkoren brood", basis: [{ ing: "tonijn", gram: 100 }, { ing: "volkoren_brood", gram: 80 }, { ing: "komkommer", gram: 60 }, { ing: "ui", gram: 20 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Meng de tonijn met fijngesneden ui, komkommer en olijfolie.", "Serveer op of naast het volkoren brood."] },
+        { id: "l5", naam: "Linzensoep met roggebrood", basis: [{ ing: "linzen", gram: 250 }, { ing: "ui", gram: 40 }, { ing: "knoflook", gram: 10 }, { ing: "roggebrood", gram: 50 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Fruit ui en knoflook glazig in de olijfolie.", "Voeg de linzen en wat water of bouillon toe en verwarm door.", "Serveer met een snee roggebrood."] },
+        { id: "l6", naam: "Bowl met hummus, kip en groenten", basis: [{ ing: "zilvervliesrijst", gram: 120 }, { ing: "kipfilet", gram: 100 }, { ing: "hummus", gram: 60 }, { ing: "paprika", gram: 80 }, { ing: "komkommer", gram: 60 }], bereiding: ["Verdeel de rijst in een kom.", "Top af met plakjes kipfilet, hummus, paprika en komkommer."] },
+    ],
+    diner: [
+        { id: "d1", naam: "Zalm met zoete aardappel en broccoli", basis: [{ ing: "zalm", gram: 150 }, { ing: "zoete_aardappel", gram: 200 }, { ing: "broccoli", gram: 150 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Bak de zalm in olijfolie op middelhoog vuur.", "Kook of stoom de zoete aardappel en broccoli gaar.", "Serveer samen op een bord."] },
+        { id: "d2", naam: "Kipfilet met zilvervliesrijst en groenten", basis: [{ ing: "kipfilet", gram: 150 }, { ing: "zilvervliesrijst", gram: 150 }, { ing: "broccoli", gram: 100 }, { ing: "paprika", gram: 80 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Bak de kipfilet gaar in olijfolie.", "Kook de rijst volgens verpakking.", "Stoom broccoli en paprika kort en serveer samen."] },
+        { id: "d3", naam: "Rundergehaktschotel met aardappelpuree", basis: [{ ing: "rundergehakt", gram: 150 }, { ing: "aardappel", gram: 250 }, { ing: "ui", gram: 40 }, { ing: "boter", gram: 10 }, { ing: "broccoli", gram: 100 }], bereiding: ["Kook de aardappel gaar en stamp met boter tot puree.", "Bak het gehakt met ui rul.", "Serveer met gestoomde broccoli."] },
+        { id: "d4", naam: "Tofu-roerbak met glutenvrije noedels", basis: [{ ing: "tofu", gram: 150 }, { ing: "glutenvrije_pasta", gram: 150 }, { ing: "paprika", gram: 80 }, { ing: "broccoli", gram: 100 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Bak de tofu goudbruin in olijfolie.", "Voeg paprika en broccoli toe en roerbak kort mee.", "Meng met de gekookte glutenvrije noedels."] },
+        { id: "d5", naam: "Volkoren pasta met kip en tomatensaus", basis: [{ ing: "volkoren_pasta", gram: 150 }, { ing: "kipfilet", gram: 120 }, { ing: "tomaat", gram: 150 }, { ing: "knoflook", gram: 10 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Bak de kip gaar in olijfolie met knoflook.", "Voeg de tomaat toe en laat inkoken tot een saus.", "Meng door de gekookte volkoren pasta."] },
+        { id: "d6", naam: "Garnalen-quinoa bowl", basis: [{ ing: "garnalen", gram: 150 }, { ing: "quinoa", gram: 150 }, { ing: "avocado", gram: 60 }, { ing: "komkommer", gram: 60 }, { ing: "olijfolie", gram: 10 }], bereiding: ["Bak de garnalen kort in olijfolie tot ze roze zijn.", "Meng met de gekookte quinoa, avocado en komkommer."] },
+    ],
+    snack: [
+        { id: "s1", naam: "Handje amandelen", basis: [{ ing: "amandelen", gram: 30 }], bereiding: [] },
+        { id: "s2", naam: "Magere kwark met honing", basis: [{ ing: "magere_kwark", gram: 150 }, { ing: "honing", gram: 15 }], bereiding: [] },
+        { id: "s3", naam: "Rijstwafels met pindakaas", basis: [{ ing: "rijstwafels", gram: 20 }, { ing: "pindakaas", gram: 20 }], bereiding: [] },
+        { id: "s4", naam: "Appel", basis: [{ ing: "appel", gram: 200 }], bereiding: [] },
+        { id: "s5", naam: "Hummus met komkommer", basis: [{ ing: "hummus", gram: 60 }, { ing: "komkommer", gram: 100 }], bereiding: [] },
+        { id: "s6", naam: "Gekookt ei", basis: [{ ing: "ei", gram: 100 }], bereiding: [] },
+        { id: "s7", naam: "Edamame", basis: [{ ing: "edamame", gram: 150 }], bereiding: [] },
+        { id: "s8", naam: "Kokosyoghurt met blauwe bessen", basis: [{ ing: "kokosyoghurt", gram: 150 }, { ing: "blauwe_bessen", gram: 50 }], bereiding: [] },
+    ],
+};
+function berekenTotalen(basis, factor) {
+    return basis.reduce((acc, r) => {
+        const ing = INGREDIENTEN[r.ing];
+        const g = (r.gram * factor) / 100;
+        return {
+            kcal: acc.kcal + ing.kcal * g,
+            eiwit: acc.eiwit + ing.eiwit * g,
+            kh: acc.kh + ing.kh * g,
+            vet: acc.vet + ing.vet * g,
+        };
+    }, { kcal: 0, eiwit: 0, kh: 0, vet: 0 });
+}
+function recipeTags(recipe) {
+    const tags = new Set();
+    recipe.basis.forEach((r) => INGREDIENTEN[r.ing].tags.forEach((t) => tags.add(t)));
+    return Array.from(tags);
+}
+function filterRecepten(lijst, uitgesloten) {
+    if (!uitgesloten.length) return lijst;
+    return lijst.filter((r) => !recipeTags(r).some((t) => uitgesloten.includes(t)));
+}
+function schaalMaaltijd(recipe, doelKcalMaaltijd) {
+    const basis = berekenTotalen(recipe.basis, 1);
+    let factor = basis.kcal > 0 ? doelKcalMaaltijd / basis.kcal : 1;
+    factor = Math.max(0.6, Math.min(2.2, factor));
+    const totaal = berekenTotalen(recipe.basis, factor);
+    const ingredienten = recipe.basis.map((r) => ({
+        naam: INGREDIENTEN[r.ing].naam,
+        gram: Math.round(r.gram * factor),
+    }));
+    return { recipe, ingredienten, totaal };
+}
+const VERDELING = { ontbijt: 0.25, lunch: 0.3, diner: 0.35, snack: 0.1 };
+function genereerVoedingsplan(doelKcal, uitgesloten) {
+    const ontbijtPool = filterRecepten(RECEPTEN.ontbijt, uitgesloten);
+    const lunchPool = filterRecepten(RECEPTEN.lunch, uitgesloten);
+    const dinerPool = filterRecepten(RECEPTEN.diner, uitgesloten);
+    const snackPool = filterRecepten(RECEPTEN.snack, uitgesloten);
+    if (!ontbijtPool.length || !lunchPool.length || !dinerPool.length || snackPool.length < 2) {
+        return { leeg: true };
+    }
+    const dagen = [0, 1, 2].map((i) => {
+        const ontbijtRecipe = ontbijtPool[i % ontbijtPool.length];
+        const lunchRecipe = lunchPool[i % lunchPool.length];
+        const dinerRecipe = dinerPool[i % dinerPool.length];
+        const snack1Recipe = snackPool[(i * 2) % snackPool.length];
+        const snack2Recipe = snackPool[(i * 2 + 1) % snackPool.length];
+        const ontbijt = schaalMaaltijd(ontbijtRecipe, doelKcal * VERDELING.ontbijt);
+        const lunch = schaalMaaltijd(lunchRecipe, doelKcal * VERDELING.lunch);
+        const diner = schaalMaaltijd(dinerRecipe, doelKcal * VERDELING.diner);
+        const snack1 = schaalMaaltijd(snack1Recipe, (doelKcal * VERDELING.snack) / 2);
+        const snack2 = schaalMaaltijd(snack2Recipe, (doelKcal * VERDELING.snack) / 2);
+        const totaal = [ontbijt, lunch, diner, snack1, snack2].reduce((acc, m) => ({
+            kcal: acc.kcal + m.totaal.kcal,
+            eiwit: acc.eiwit + m.totaal.eiwit,
+            kh: acc.kh + m.totaal.kh,
+            vet: acc.vet + m.totaal.vet,
+        }), { kcal: 0, eiwit: 0, kh: 0, vet: 0 });
+        return { dag: i + 1, ontbijt, lunch, diner, snacks: [snack1, snack2], totaal };
+    });
+    return { leeg: false, dagen };
+}
 function LedgerRow({ label, value, unit, bold, color, big }) {
     return (React.createElement("div", { className: `flex items-baseline gap-3 ${big ? "py-2" : "py-1"}` },
         React.createElement("span", { style: { color: bold ? COLORS.ink : COLORS.inkSoft }, className: `whitespace-nowrap ${big ? "text-base" : "text-sm"} ${bold ? "font-semibold" : ""}` }, label),
@@ -172,6 +340,134 @@ function LedgerRow({ label, value, unit, bold, color, big }) {
             unit ? React.createElement("span", { style: { color: COLORS.inkFaint, fontWeight: 400 } },
                 " ",
                 unit) : null)));
+}
+function genereerVoedingsplanPDF(voedingsplan, doelKcal) {
+    if (!window.jspdf) {
+        alert("PDF-bibliotheek is niet geladen. Herlaad de pagina en probeer opnieuw.");
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 48;
+    const orange = [245, 130, 32];
+    const ink = [34, 34, 34];
+    const inkSoft = [92, 92, 92];
+    const inkFaint = [143, 143, 143];
+    let y = 0;
+    const checkPageBreak = (nodig) => {
+        if (y + nodig > pageHeight - 56) {
+            doc.addPage();
+            y = 56;
+        }
+    };
+    const tekenHeader = () => {
+        doc.setFillColor(34, 34, 34);
+        doc.rect(0, 0, pageWidth, 60, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("MORE2BFIT", marginX, 36);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(200, 200, 200);
+        doc.text("Voorbeeld voedingsplan", marginX, 50);
+        y = 84;
+    };
+    const tekenMaaltijd = (titel, maaltijd) => {
+        checkPageBreak(70);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...orange);
+        doc.text(titel.toUpperCase(), marginX, y);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...inkFaint);
+        doc.text(`${Math.round(maaltijd.totaal.kcal)} kcal`, pageWidth - marginX, y, { align: "right" });
+        y += 16;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(...ink);
+        doc.text(maaltijd.recipe.naam, marginX, y);
+        y += 16;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(...inkSoft);
+        maaltijd.ingredienten.forEach((ing) => {
+            checkPageBreak(14);
+            doc.text(`\u2022 ${ing.naam} \u2014 ${ing.gram} g`, marginX + 6, y);
+            y += 13;
+        });
+        if (maaltijd.recipe.bereiding.length) {
+            y += 3;
+            maaltijd.recipe.bereiding.forEach((stap, idx) => {
+                checkPageBreak(24);
+                const regels = doc.splitTextToSize(`${idx + 1}. ${stap}`, pageWidth - marginX * 2 - 6);
+                doc.text(regels, marginX + 6, y);
+                y += regels.length * 12;
+            });
+        }
+        y += 6;
+        doc.setFontSize(8);
+        doc.setTextColor(...inkFaint);
+        doc.text(`${Math.round(maaltijd.totaal.eiwit)}g eiwit \u00B7 ${Math.round(maaltijd.totaal.kh)}g koolhydraten \u00B7 ${Math.round(maaltijd.totaal.vet)}g vet`, marginX, y);
+        y += 18;
+    };
+    voedingsplan.dagen.forEach((dag, idx) => {
+        if (idx > 0) doc.addPage();
+        tekenHeader();
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.setTextColor(...ink);
+        doc.text(`Dag ${dag.dag}`, marginX, y);
+        y += 24;
+        tekenMaaltijd("Ontbijt", dag.ontbijt);
+        tekenMaaltijd("Lunch", dag.lunch);
+        tekenMaaltijd("Diner", dag.diner);
+        dag.snacks.forEach((s, sIdx) => tekenMaaltijd(`Snack ${sIdx + 1}`, s));
+        checkPageBreak(90);
+        doc.setFillColor(34, 34, 34);
+        doc.roundedRect(marginX, y, pageWidth - marginX * 2, 30, 4, 4, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("Totaal deze dag", marginX + 10, y + 19);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...orange);
+        doc.text(`${Math.round(dag.totaal.kcal)} kcal \u00B7 ${Math.round(dag.totaal.eiwit)}g E \u00B7 ${Math.round(dag.totaal.kh)}g KH \u00B7 ${Math.round(dag.totaal.vet)}g V`, pageWidth - marginX - 10, y + 19, { align: "right" });
+        y += 46;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...inkFaint);
+        const disclaimer = doc.splitTextToSize("Dit voedingsplan is een indicatief voorbeeld, geen medisch of di\u00EBtistisch advies. Controleer bij allergie\u00EBn of intoleranties altijd zelf de etiketten van producten.", pageWidth - marginX * 2);
+        doc.text(disclaimer, marginX, y);
+    });
+    doc.save("more2bfit-voedingsplan.pdf");
+}
+function MealCard({ titel, maaltijd }) {
+    return (React.createElement("div", { className: "rounded-lg p-4 mb-3", style: { background: COLORS.paperCard, border: `1px solid ${COLORS.line}` } },
+        React.createElement("div", { className: "flex justify-between items-baseline mb-2" },
+            React.createElement("span", { className: "text-xs tracking-[0.15em] uppercase font-mono", style: { color: COLORS.orangeDark } }, titel),
+            React.createElement("span", { className: "font-mono text-xs", style: { color: COLORS.inkFaint } },
+                Math.round(maaltijd.totaal.kcal),
+                " kcal")),
+        React.createElement("div", { className: "font-body text-sm font-semibold mb-2", style: { color: COLORS.ink } }, maaltijd.recipe.naam),
+        React.createElement("ul", { className: "text-xs mb-2", style: { color: COLORS.inkSoft, paddingLeft: "18px", margin: 0 } }, maaltijd.ingredienten.map((ing, idx) => (React.createElement("li", { key: idx },
+            ing.naam,
+            " \u2014 ",
+            ing.gram,
+            " g")))),
+        maaltijd.recipe.bereiding.length > 0 && (React.createElement("ol", { className: "text-xs mb-2", style: { color: COLORS.inkFaint, paddingLeft: "18px", margin: 0 } }, maaltijd.recipe.bereiding.map((stap, idx) => (React.createElement("li", { key: idx }, stap))))),
+        React.createElement("div", { className: "flex gap-3 text-[10px] font-mono", style: { color: COLORS.inkFaint } },
+            React.createElement("span", null,
+                Math.round(maaltijd.totaal.eiwit),
+                "g eiwit"),
+            React.createElement("span", null,
+                Math.round(maaltijd.totaal.kh),
+                "g kh"),
+            React.createElement("span", null,
+                Math.round(maaltijd.totaal.vet),
+                "g vet"))));
 }
 function TallyBar({ fraction, color, trackColor }) {
     return (React.createElement("div", { className: "w-full h-2 rounded-full overflow-hidden", style: { background: trackColor } },
@@ -195,7 +491,16 @@ function Calorieboek() {
     const [toonFormulier, setToonFormulier] = useState(false);
     const [verzonden, setVerzonden] = useState(false);
     const [contact, setContact] = useState({ naam: "", email: "", telefoon: "", bericht: "" });
+    const [allergieen, setAllergieen] = useState([]);
+    const [afkeuren, setAfkeuren] = useState([]);
+    const [extraVoorkeuren, setExtraVoorkeuren] = useState("");
+    const [toonVoedingsplan, setToonVoedingsplan] = useState(false);
+    const [actieveDag, setActieveDag] = useState(0);
     const CONTACT_EMAIL = "info@more2bfit.nl"; // TODO: vervang door het echte contactadres
+    const toggleInLijst = (lijst, setLijst, key) => {
+        setLijst(lijst.includes(key) ? lijst.filter((k) => k !== key) : [...lijst, key]);
+    };
+    const uitgeslotenTags = useMemo(() => Array.from(new Set([...allergieen, ...afkeuren])), [allergieen, afkeuren]);
     const berekening = useMemo(() => {
         var _a;
         const g = Number(gewicht) || 0;
@@ -237,6 +542,7 @@ function Calorieboek() {
             fractieDoelVanTdee: tdee > 0 ? doel / tdee : 0,
         };
     }, [geslacht, leeftijd, lengte, gewicht, activiteit, richting, tempo, streefverlies]);
+    const voedingsplan = useMemo(() => genereerVoedingsplan(berekening.doel, uitgeslotenTags), [berekening.doel, uitgeslotenTags]);
     const vandaag = new Date().toLocaleDateString("nl-NL", {
         day: "numeric",
         month: "long",
@@ -410,6 +716,62 @@ function Calorieboek() {
                             " kg,",
                             React.createElement("br", null),
                             "bij dit tempo volgehouden"))))),
+            React.createElement("div", { className: "px-6 md:px-10 py-8 border-t", style: { borderColor: COLORS.line, background: COLORS.paper } },
+                React.createElement("div", { className: "text-xs tracking-[0.15em] uppercase font-mono mb-4", style: { color: COLORS.inkFaint } }, "Voedingsvoorkeuren"),
+                React.createElement("div", { className: "mb-4" },
+                    React.createElement("div", { className: "text-sm font-medium mb-2", style: { color: COLORS.ink } }, "Allergie\u00EBn / intoleranties"),
+                    React.createElement("div", { className: "flex flex-wrap gap-2" }, ALLERGENEN.map((a) => (React.createElement("button", { key: a.key, onClick: () => toggleInLijst(allergieen, setAllergieen, a.key), className: "text-xs font-medium rounded-full transition-colors", style: {
+                            padding: "7px 14px",
+                            background: allergieen.includes(a.key) ? COLORS.alert : COLORS.paperDark,
+                            color: allergieen.includes(a.key) ? "#FFFFFF" : COLORS.inkSoft,
+                        } }, a.label))))),
+                React.createElement("div", { className: "mb-4" },
+                    React.createElement("div", { className: "text-sm font-medium mb-2", style: { color: COLORS.ink } }, "Liever niet / smaakvoorkeuren"),
+                    React.createElement("div", { className: "flex flex-wrap gap-2" }, AFKEUREN.map((a) => (React.createElement("button", { key: a.key, onClick: () => toggleInLijst(afkeuren, setAfkeuren, a.key), className: "text-xs font-medium rounded-full transition-colors", style: {
+                            padding: "7px 14px",
+                            background: afkeuren.includes(a.key) ? COLORS.ink : COLORS.paperDark,
+                            color: afkeuren.includes(a.key) ? "#FFFFFF" : COLORS.inkSoft,
+                        } }, a.label))))),
+                React.createElement("div", { className: "mb-5" },
+                    React.createElement("label", { className: "text-sm font-medium block mb-2", style: { color: COLORS.ink } },
+                        "Overige voorkeuren of afkeuren ",
+                        React.createElement("span", { style: { color: COLORS.inkFaint } }, "(optioneel, alleen als notitie)")),
+                    React.createElement("input", { type: "text", value: extraVoorkeuren, onChange: (e) => setExtraVoorkeuren(e.target.value), placeholder: "Bijvoorbeeld: niet te pittig, geen paddenstoelen", className: "w-full px-3 py-2 text-sm rounded-lg outline-none", style: { background: COLORS.paperDark, color: COLORS.ink } })),
+                React.createElement("button", { onClick: () => setToonVoedingsplan(true), className: "px-5 py-3 rounded-lg text-sm font-semibold whitespace-nowrap transition-transform hover:scale-[1.02]", style: { background: COLORS.orange, color: "#FFFFFF" } }, "Genereer voedingsplan"),
+                toonVoedingsplan && voedingsplan.leeg && (React.createElement("div", { className: "text-xs mt-4 px-3 py-2 rounded-lg", style: { background: "#F7E3E0", color: COLORS.alert } }, "Met deze combinatie van allergie\u00EBn en voorkeuren zijn er te weinig recepten over om een gevarieerd voedingsplan te maken. Zet een aantal selecties uit en probeer opnieuw.")),
+                toonVoedingsplan && !voedingsplan.leeg && (React.createElement("div", { className: "mt-6" },
+                    React.createElement("div", { className: "flex flex-wrap gap-2 mb-4 justify-between items-center" },
+                        React.createElement("div", { className: "flex gap-2" }, voedingsplan.dagen.map((d, idx) => (React.createElement("button", { key: idx, onClick: () => setActieveDag(idx), className: "px-4 py-2 text-xs font-semibold rounded-lg transition-colors", style: {
+                                background: actieveDag === idx ? COLORS.ink : COLORS.paperDark,
+                                color: actieveDag === idx ? "#FFFFFF" : COLORS.inkSoft,
+                            } },
+                            "Dag ",
+                            d.dag)))),
+                        React.createElement("button", { onClick: () => genereerVoedingsplanPDF(voedingsplan, berekening.doel), className: "px-4 py-2 text-xs font-semibold rounded-lg transition-colors", style: { background: COLORS.paperDark, color: COLORS.ink } }, "\u2193 Download als PDF")),
+                    (() => {
+                        const dag = voedingsplan.dagen[actieveDag];
+                        return (React.createElement(React.Fragment, null,
+                            React.createElement(MealCard, { titel: "Ontbijt", maaltijd: dag.ontbijt }),
+                            React.createElement(MealCard, { titel: "Lunch", maaltijd: dag.lunch }),
+                            React.createElement(MealCard, { titel: "Diner", maaltijd: dag.diner }),
+                            dag.snacks.map((s, idx) => (React.createElement(MealCard, { key: idx, titel: `Snack ${idx + 1}`, maaltijd: s }))),
+                            React.createElement("div", { className: "flex items-center justify-between px-4 py-3 rounded-lg mt-3", style: { background: COLORS.ink } },
+                                React.createElement("span", { className: "text-xs font-mono", style: { color: "#D7DAD8" } }, "Totaal deze dag"),
+                                React.createElement("span", { className: "font-mono text-sm font-bold", style: { color: COLORS.orange } },
+                                    Math.round(dag.totaal.kcal),
+                                    " kcal \u00B7 ",
+                                    Math.round(dag.totaal.eiwit),
+                                    "g E \u00B7 ",
+                                    Math.round(dag.totaal.kh),
+                                    "g KH \u00B7 ",
+                                    Math.round(dag.totaal.vet),
+                                    "g V"))));
+                    })(),
+                    extraVoorkeuren && (React.createElement("div", { className: "text-xs mt-3", style: { color: COLORS.inkFaint } },
+                        "Genoteerde extra voorkeur: \u201C",
+                        extraVoorkeuren,
+                        "\u201D \u2014 hier is nog niet automatisch op gefilterd, controleer dit zelf in het plan.")),
+                    React.createElement("div", { className: "text-xs mt-4", style: { color: COLORS.inkFaint } }, "Dit voedingsplan is een indicatief voorbeeld, geen medisch of di\u00EBtistisch advies. Controleer bij allergie\u00EBn of intoleranties altijd zelf de etiketten van producten.")))),
             React.createElement("div", { className: "px-6 md:px-10 py-8 border-t", style: { borderColor: COLORS.line, background: COLORS.paperDark } },
                 !toonFormulier && !verzonden && (React.createElement("div", { className: "flex flex-col sm:flex-row items-center justify-between gap-4" },
                     React.createElement("div", null,
