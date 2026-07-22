@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MORE2BFIT Persoonlijk Gezondheidsadvies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./phosphor-regular.css">
+<script src="./jspdf.umd.min.js"></script>
+<style>
+:root{
+  --orange:#f47b20;
+  --orange-dark:#d8620e;
+  --orange-soft:#fff4eb;
+  --orange-bg-light:#fff8f2;
+  --orange-border:#f0bc94;
+  --anthracite:#3f403f;
+  --text:#474747;
+  --text-secondary:#666;
+  --label-color:#555;
+  --muted:#777;
+  --card-bg:#fafafa;
+  --line:#e8e8e5;
+  --error:#a74632;
+  --bg:#f6f6f3;
+  --white:#fff;
+  --shadow:0 16px 50px rgba(40,40,40,.055);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:"Montserrat",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.wrap{width:min(1180px,calc(100% - 32px));margin:auto}
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px
+}
+.logo{font-weight:900;font-size:22px;color:var(--anthracite);letter-spacing:-.03em}
+.logo span{color:var(--orange)}
+.top-actions{display:flex;gap:10px}
+.btn{
+  min-height:46px;padding:12px 17px;border-radius:13px;border:1px solid var(--line);
+  background:var(--white);color:var(--anthracite);font-weight:800
+}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.hero{
+  padding:60px 0 28px;
+  display:grid;grid-template-columns:1.3fr .7fr;gap:22px
+}
+.hero-card,.summary-card{
+  background:var(--white);border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow)
+}
+.hero-card{padding:clamp(34px,6vw,70px)}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  color:var(--orange-dark);font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase
+}
+h1{margin:20px 0 18px;font-size:clamp(40px,6vw,76px);line-height:.98;letter-spacing:-.055em;color:var(--anthracite)}
+.hero-card p{max-width:720px;color:var(--muted);font-size:18px;line-height:1.75;margin:0}
+.summary-card{padding:28px;display:flex;flex-direction:column;justify-content:space-between}
+.summary-card i{font-size:34px;color:var(--orange)}
+.summary-card strong{font-size:23px;line-height:1.15;color:var(--anthracite);display:block;margin:20px 0 10px}
+.summary-card p{margin:0;color:var(--muted);font-size:14px}
+.progress{
+  position:sticky;top:87px;z-index:35;
+  margin:0 0 26px;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);
+  border:1px solid var(--line);border-radius:17px;padding:8px;box-shadow:0 10px 30px rgba(40,40,40,.05)
+}
+.progress-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.progress button{
+  border:0;background:transparent;padding:11px 10px;border-radius:11px;color:var(--muted);font-weight:800;font-size:12px
+}
+.progress button.active{background:var(--anthracite);color:var(--white)}
+.section{
+  background:var(--white);border:1px solid var(--line);border-radius:32px;padding:clamp(28px,5vw,58px);
+  margin:0 0 24px;box-shadow:0 14px 40px rgba(40,40,40,.035);scroll-margin-top:165px
+}
+.section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:30px}
+.section-kicker{color:var(--orange-dark);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.section h2{margin:7px 0 10px;font-size:clamp(28px,4vw,44px);line-height:1.1;color:var(--anthracite);letter-spacing:-.04em}
+.section-head p{max-width:660px;margin:0;color:var(--muted);line-height:1.7}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.field{display:grid;gap:9px}
+.field label{font-size:13px;font-weight:800;color:var(--label-color)}
+input[type="text"],input[type="number"],input[type="email"],input[type="date"],textarea,select.field-select{
+  width:100%;border:1px solid var(--line);border-radius:14px;padding:14px 15px;background:#fbfbfa;color:var(--text);outline:none;
+  font-family:inherit;font-size:14px
+}
+.consent-field{
+  display:flex;align-items:flex-start;gap:11px;
+  border:1px solid var(--line);border-radius:14px;padding:14px 15px;background:#fbfbfa;
+  margin-top:16px
+}
+.consent-field input[type="checkbox"]{
+  width:19px;height:19px;flex:0 0 19px;margin-top:1px;accent-color:var(--orange);cursor:pointer
+}
+.consent-field label{font-size:12px;color:var(--text-secondary);line-height:1.55;cursor:pointer}
+.safety-field{
+  margin-top:16px;border:1px solid var(--orange-border);border-radius:16px;padding:16px 18px;background:var(--orange-bg-light)
+}
+.safety-field label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--anthracite)}
+.safety-field label i{color:var(--orange-dark);font-size:17px}
+.safety-field textarea{margin-top:9px;background:var(--white)}
+
+.injury-choice-grid,.muscle-choice-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.injury-choice{
+  border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--white);
+  font-size:11.5px;font-weight:700;color:var(--text-secondary);text-align:center;cursor:pointer;transition:.15s;font-family:inherit
+}
+.injury-choice.selected{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.muscle-choice{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  border:1px solid var(--line);border-radius:14px;padding:14px 10px;background:var(--white);
+  font-size:12px;font-weight:800;color:var(--text-secondary);cursor:pointer;transition:.15s;font-family:inherit
+}
+.muscle-choice i{font-size:20px;color:var(--orange)}
+.muscle-choice.selected{background:var(--anthracite);border-color:var(--anthracite);color:var(--white)}
+.muscle-choice.selected i{color:var(--orange)}
+
+.advice-callout{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--white)}
+.advice-callout.avoid{border-color:var(--orange-border);background:var(--orange-bg-light)}
+.advice-callout b{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--anthracite)}
+.advice-callout.avoid b i{color:var(--orange-dark)}
+.advice-callout.prefer b i{color:var(--anthracite)}
+.advice-callout ul{margin:10px 0 0;padding-left:18px;font-size:12.5px;color:var(--text-secondary);line-height:1.65}
+.advice-callout ul li{margin-bottom:3px}
+.advice-callout p.empty{margin:8px 0 0;color:var(--muted);font-size:12px}
+
+.muscle-advice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.muscle-advice-card{border:1px solid var(--line);border-radius:16px;padding:16px 18px;background:#fbfbfa}
+.muscle-advice-card b{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--anthracite);margin-bottom:8px}
+.muscle-advice-card b i{color:var(--orange)}
+.muscle-advice-card ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--text-secondary);line-height:1.65}
+.muscle-advice-card small{display:block;margin-top:9px;color:var(--orange-dark);font-size:11px;font-weight:700}
+
+.week-schedule{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.week-day-card{border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:var(--white)}
+.week-day-card>b{display:block;color:var(--orange-dark);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.week-day-group{margin-bottom:10px}
+.week-day-group strong{display:block;font-size:12.5px;color:var(--anthracite)}
+.week-day-group ul{margin:4px 0 0;padding-left:16px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.week-day-group ul li{margin-bottom:1px}
+
+.protocol-card{border:1px solid var(--line);background:var(--bg);border-radius:16px;padding:16px 18px;margin-bottom:10px}
+.protocol-card b{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--anthracite)}
+.protocol-card b i{color:var(--anthracite)}
+.protocol-card ol{margin:10px 0 0;padding-left:18px;font-size:12.5px;color:var(--label-color);line-height:1.7}
+.protocol-card ol li{margin-bottom:4px}
+textarea{min-height:112px;resize:vertical}
+input:focus,textarea:focus{border-color:var(--orange-border);box-shadow:0 0 0 3px rgba(244,123,32,.1)}
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.choice{
+  min-height:142px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--white);text-align:left;
+  transition:.18s ease
+}
+.choice:hover{transform:translateY(-2px)}
+.choice.active{border-color:var(--orange-border);background:var(--orange-bg-light);box-shadow:inset 0 0 0 1px rgba(244,123,32,.15)}
+.choice i{font-size:24px;color:var(--anthracite)}
+.choice.active i{color:var(--orange)}
+.choice strong{display:block;margin:16px 0 7px;color:var(--anthracite);font-size:16px}
+.choice span{color:var(--muted);font-size:12px;line-height:1.55}
+.day-card{border:1px solid var(--line);border-radius:17px;padding:14px;background:var(--card-bg)}
+.day-card h4{margin:0 0 11px;color:var(--label-color);font-size:13px}
+.activity-chip.active{background:var(--orange-soft);border-color:var(--orange-border);color:var(--orange-dark)}
+.score-scale{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}
+.score-scale button{
+  height:45px;border:1px solid var(--line);border-radius:11px;background:var(--white);color:var(--muted);font-weight:900
+}
+.score-scale button.active{background:var(--orange);border-color:var(--orange);color:var(--white)}
+.arrow{text-align:center;color:var(--orange);font-size:26px}
+.track{height:9px;background:var(--line);border-radius:999px;overflow:hidden}
+.fill{height:100%;background:var(--orange);border-radius:999px;width:0;transition:.4s}
+
+
+
+
+
+
+
+
+.reason-choice small{
+  display:block;
+  margin-top:8px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.55;
+}
+.subjective-grid{
+  margin-top:22px;
+}
+
+.field-help{
+  margin:5px 0 12px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+.reason-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.reason-choice{
+  position:relative;
+  min-height:96px;
+  padding:16px 12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card-bg);
+  color:var(--anthracite);
+  text-align:left;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.reason-choice:hover{
+  border-color:var(--orange-border);
+  transform:translateY(-1px);
+}
+.reason-choice.selected{
+  border-color:var(--orange);
+  background:var(--orange-bg-light);
+  box-shadow:0 0 0 2px rgba(234,104,36,.08);
+}
+.reason-choice i{
+  display:block;
+  margin-bottom:12px;
+  color:var(--orange);
+  font-size:22px;
+}
+.reason-choice strong{
+  display:block;
+  font-size:15px;
+  line-height:1.4;
+  font-weight:800;
+}
+.reason-order{
+  position:absolute;
+  top:9px;
+  right:9px;
+  width:22px;
+  height:22px;
+  display:none;
+  place-items:center;
+  border-radius:50%;
+  background:var(--anthracite);
+  color:var(--white);
+  font-size:10px;
+  font-weight:900;
+}
+.reason-choice.selected .reason-order{display:grid}
+.reason-limit-message{
+  min-height:16px;
+  margin-top:8px;
+  color:var(--error);
+  font-size:10px;
+}
+
+
+.advice-priority{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--card-bg);
+}
+.advice-priority:first-child{
+  border-color:var(--orange-border);
+  background:var(--orange-bg-light);
+}
+.advice-priority-rank{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--anthracite);
+  color:var(--white);
+  font-size:11px;
+  font-weight:900;
+}
+.advice-priority strong{
+  display:block;
+  font-size:12px;
+}
+.advice-priority small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+}
+.advice-priority-weight{
+  color:var(--orange-dark);
+  font-size:11px;
+  font-weight:900;
+}
+
+.subjective-scale{
+  padding:16px 18px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card-bg);
+}
+.scale-top{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+.scale-top span:last-child{text-align:right}
+.scale-top strong{
+  color:var(--anthracite);
+  font-size:18px;
+}
+.subjective-scale input[type="range"]{
+  width:100%;
+  accent-color:var(--orange);
+}
+.subjective-scale p{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+
+
+.health-score-overview{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:18px;
+  align-items:stretch;
+  margin-top:18px;
+}
+.health-score-card{
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--card-bg);
+}
+.health-score-card.future{
+  background:var(--anthracite);
+  color:var(--white);
+}
+.health-score-label{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.health-score-card.future .health-score-label{color:rgba(255,255,255,.62)}
+.health-score-number{
+  display:flex;
+  align-items:flex-end;
+  gap:4px;
+  margin:8px 0 10px;
+}
+.health-score-number strong{
+  font-size:clamp(48px,7vw,72px);
+  line-height:.9;
+  letter-spacing:-.06em;
+}
+.health-score-number small{
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:16px;
+  font-weight:800;
+}
+.health-score-card.future .health-score-number small{color:rgba(255,255,255,.52)}
+.health-score-profile{
+  display:inline-flex;
+  padding:7px 11px;
+  border-radius:999px;
+  background:var(--line);
+  font-size:11px;
+  font-weight:900;
+}
+.health-score-card.future .health-score-profile{background:rgba(255,255,255,.12)}
+.health-score-change{
+  display:flex;
+  min-width:132px;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.health-score-change i{
+  color:var(--orange);
+  font-size:28px;
+}
+.health-score-change strong{
+  margin-top:8px;
+  color:var(--orange-dark);
+  font-size:20px;
+}
+.health-score-change span{
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:800;
+}
+.health-score-note{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin-top:16px;
+  padding:14px 16px;
+  border:1px solid var(--orange-border);
+  border-radius:15px;
+  background:var(--orange-bg-light);
+}
+.health-score-note i{color:var(--orange);font-size:20px}
+.health-score-note p{margin:0;color:#806f63;font-size:11px;line-height:1.55}
+.health-domains{
+  margin-top:22px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  overflow:hidden;
+}
+.domain-head,.domain-row{
+  display:grid;
+  grid-template-columns:minmax(190px,1.1fr) minmax(250px,1.6fr) 72px;
+  gap:18px;
+  align-items:center;
+}
+.domain-head{
+  padding:13px 18px;
+  background:var(--bg);
+  color:#8b8b8b;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.domain-legend{
+  grid-column:2/4;
+  display:flex;
+  justify-content:flex-end;
+  gap:16px;
+}
+.domain-legend span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.legend-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+}
+.current-dot{background:#c7c7c2}
+.future-dot{background:var(--orange)}
+.domain-row{
+  padding:17px 18px;
+  border-top:1px solid var(--line);
+}
+.domain-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.domain-title>i{
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  background:var(--bg);
+  color:var(--anthracite);
+  font-size:19px;
+}
+.domain-title strong{
+  display:block;
+  color:var(--anthracite);
+  font-size:13px;
+}
+.domain-title small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.35;
+}
+.domain-bars{
+  display:grid;
+  gap:7px;
+}
+.domain-track{
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line);
+}
+.domain-fill{
+  height:100%;
+  width:0;
+  border-radius:999px;
+  transition:width .45s ease;
+}
+.current-fill{background:#babbb7}
+.future-fill{background:var(--orange)}
+.domain-values{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+  font-size:12px;
+}
+.domain-values span{color:var(--muted)}
+.domain-values strong{color:var(--orange-dark)}
+
+.progress-column.future{
+  background:var(--anthracite);
+  color:var(--white);
+}
+.progress-column.future .progress-eyebrow{
+  color:rgba(255,255,255,.62);
+}
+.progress-column.future .progress-profile{
+  background:rgba(255,255,255,.12);
+}
+
+.activity-table{
+  display:grid;
+  gap:10px;
+}
+.activity-row{
+  display:grid;
+  grid-template-columns:1.55fr .7fr .85fr .9fr .7fr;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card-bg);
+}
+.activity-head{
+  background:transparent;
+  border:0;
+  padding:0 14px 4px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.activity-name{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.activity-name i{
+  font-size:25px;
+  color:var(--orange);
+}
+.activity-name strong{
+  display:block;
+  color:var(--anthracite);
+  font-size:14px;
+}
+.activity-name small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.35;
+}
+.activity-row input,.activity-row select,#weekLoad{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px 10px;
+  background:var(--white);
+  color:var(--label-color);
+}
+.mobile-field-label{display:none}
+.activity-contribution{
+  text-align:right;
+}
+.activity-contribution strong{
+  display:block;
+  color:var(--orange-dark);
+  font-size:20px;
+}
+.activity-contribution small{
+  color:var(--muted);
+  font-size:9px;
+}
+.pattern-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.pattern-summary div{
+  padding:18px;
+  border-radius:16px;
+  background:var(--anthracite);
+  color:var(--white);
+}
+.pattern-summary span{
+  display:block;
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:rgba(255,255,255,.6);
+}
+.pattern-summary strong{
+  display:block;
+  margin:5px 0 2px;
+  font-size:28px;
+}
+.pattern-summary small{
+  color:rgba(255,255,255,.68);
+  font-size:9px;
+}
+
+
+.advice-layout{display:grid;grid-template-columns:1fr .9fr;gap:20px}
+.advice-card,.plan-card{padding:28px;border-radius:25px;border:1px solid var(--line);background:var(--white)}
+.advice-card{border-left:4px solid var(--orange)}
+.price{color:var(--orange-dark);font-weight:900;font-size:15px}
+.advice-card h3{font-size:30px;margin:7px 0;color:var(--anthracite)}
+.reason-list{display:grid;gap:10px;margin-top:18px}
+.reason{display:flex;gap:10px;align-items:flex-start;color:var(--text-secondary);font-size:13px}
+.reason i{color:var(--orange);font-size:18px;margin-top:1px}
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.plan-week{padding:15px;border-radius:16px;background:var(--card-bg);border:1px solid var(--line)}
+.plan-week b{display:block;color:var(--orange-dark);font-size:11px;text-transform:uppercase;margin-bottom:7px}
+.plan-week span{font-size:12px;color:var(--muted);line-height:1.5}
+.coach-panel{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.actionbar{display:flex;justify-content:space-between;gap:12px;margin-top:26px}
+.note{font-size:11px;color:var(--muted);line-height:1.55}
+.print-report{display:none}
+@media(max-width:900px){
+.hero,.grid-2,.grid-3,.choice-grid,.advice-layout,.coach-panel{grid-template-columns:1fr}
+  .progress-grid{grid-template-columns:1fr 1fr}
+  .arrow{transform:rotate(90deg)}
+  .plan-grid{grid-template-columns:1fr 1fr}
+  .health-score-overview{grid-template-columns:1fr}
+  .health-score-change{min-width:0;flex-direction:row;gap:10px;padding:6px 0}
+  .health-score-change i{transform:rotate(90deg)}
+  .injury-choice-grid,.muscle-choice-grid{grid-template-columns:repeat(2,1fr)}
+  .muscle-advice-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .logo{font-size:18px}
+  .top-actions{gap:6px}
+  .top-actions .btn{padding:9px 11px;font-size:11px;min-height:38px;border-radius:10px}
+.plan-grid{grid-template-columns:1fr}
+  
+
+
+
+.field-help{
+  margin:5px 0 12px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+.reason-choice-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.reason-choice{
+  position:relative;
+  min-height:96px;
+  padding:16px 12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card-bg);
+  color:var(--anthracite);
+  text-align:left;
+  cursor:pointer;
+  transition:.2s ease;
+}
+.reason-choice:hover{
+  border-color:var(--orange-border);
+  transform:translateY(-1px);
+}
+.reason-choice.selected{
+  border-color:var(--orange);
+  background:var(--orange-bg-light);
+  box-shadow:0 0 0 2px rgba(234,104,36,.08);
+}
+.reason-choice i{
+  display:block;
+  margin-bottom:12px;
+  color:var(--orange);
+  font-size:22px;
+}
+.reason-choice strong{
+  display:block;
+  font-size:15px;
+  line-height:1.4;
+  font-weight:800;
+}
+.reason-order{
+  position:absolute;
+  top:9px;
+  right:9px;
+  width:22px;
+  height:22px;
+  display:none;
+  place-items:center;
+  border-radius:50%;
+  background:var(--anthracite);
+  color:var(--white);
+  font-size:10px;
+  font-weight:900;
+}
+.reason-choice.selected .reason-order{display:grid}
+.reason-limit-message{
+  min-height:16px;
+  margin-top:8px;
+  color:var(--error);
+  font-size:10px;
+}
+
+
+.advice-priority{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--card-bg);
+}
+.advice-priority:first-child{
+  border-color:var(--orange-border);
+  background:var(--orange-bg-light);
+}
+.advice-priority-rank{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--anthracite);
+  color:var(--white);
+  font-size:11px;
+  font-weight:900;
+}
+.advice-priority strong{
+  display:block;
+  font-size:12px;
+}
+.advice-priority small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+}
+.advice-priority-weight{
+  color:var(--orange-dark);
+  font-size:11px;
+  font-weight:900;
+}
+
+.subjective-scale{
+  padding:16px 18px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--card-bg);
+}
+.scale-top{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+.scale-top span:last-child{text-align:right}
+.scale-top strong{
+  color:var(--anthracite);
+  font-size:18px;
+}
+.subjective-scale input[type="range"]{
+  width:100%;
+  accent-color:var(--orange);
+}
+.subjective-scale p{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+
+
+.health-score-overview{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+  align-items:stretch;
+  margin-top:18px;
+}
+.health-score-card{
+  padding:24px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--card-bg);
+}
+.health-score-card.future{
+  background:var(--anthracite);
+  color:var(--white);
+}
+.health-score-label{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.health-score-card.future .health-score-label{color:rgba(255,255,255,.62)}
+.health-score-number{
+  display:flex;
+  align-items:flex-end;
+  gap:4px;
+  margin:8px 0 10px;
+}
+.health-score-number strong{
+  font-size:clamp(48px,7vw,72px);
+  line-height:.9;
+  letter-spacing:-.06em;
+}
+.health-score-number small{
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:16px;
+  font-weight:800;
+}
+.health-score-card.future .health-score-number small{color:rgba(255,255,255,.52)}
+.health-score-profile{
+  display:inline-flex;
+  padding:7px 11px;
+  border-radius:999px;
+  background:var(--line);
+  font-size:11px;
+  font-weight:900;
+}
+.health-score-card.future .health-score-profile{background:rgba(255,255,255,.12)}
+.health-score-change{
+  display:flex;
+  min-width:0;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:4px 0;
+  text-align:center;
+}
+.health-score-change i{
+  color:var(--orange);
+  font-size:28px;
+}
+.health-score-change strong{
+  margin-top:8px;
+  color:var(--orange-dark);
+  font-size:20px;
+}
+.health-score-change span{
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:800;
+}
+.health-score-note{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  margin-top:16px;
+  padding:14px 16px;
+  border:1px solid var(--orange-border);
+  border-radius:15px;
+  background:var(--orange-bg-light);
+}
+.health-score-note i{color:var(--orange);font-size:20px}
+.health-score-note p{margin:0;color:#806f63;font-size:11px;line-height:1.55}
+.health-domains{
+  margin-top:22px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  overflow:hidden;
+}
+.domain-head,.domain-row{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  align-items:start;
+}
+.domain-head{
+  padding:13px 18px;
+  background:var(--bg);
+  color:#8b8b8b;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.domain-legend{
+  grid-column:1/-1;
+  display:flex;
+  justify-content:flex-start;
+  gap:16px;
+}
+.domain-legend span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.legend-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+}
+.current-dot{background:#c7c7c2}
+.future-dot{background:var(--orange)}
+.domain-row{
+  padding:17px 18px;
+  border-top:1px solid var(--line);
+}
+.domain-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.domain-title>i{
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  background:var(--bg);
+  color:var(--anthracite);
+  font-size:19px;
+}
+.domain-title strong{
+  display:block;
+  color:var(--anthracite);
+  font-size:13px;
+}
+.domain-title small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.35;
+}
+.domain-bars{
+  display:grid;
+  gap:7px;
+}
+.domain-track{
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line);
+}
+.domain-fill{
+  height:100%;
+  width:0;
+  border-radius:999px;
+  transition:width .45s ease;
+}
+.current-fill{background:#babbb7}
+.future-fill{background:var(--orange)}
+.domain-values{
+  display:flex;
+  justify-content:flex-start;
+  gap:9px;
+  font-size:12px;
+}
+.domain-values span{color:var(--muted)}
+.domain-values strong{color:var(--orange-dark)}
+
+  .activity-row{grid-template-columns:1fr 1fr}
+  .activity-head{display:none}
+  .activity-name{grid-column:1/-1}
+  .mobile-field-label{display:block;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .activity-contribution{text-align:left}
+  .pattern-summary{grid-template-columns:1fr}
+}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:var(--white)}
+  .topbar,.hero,.progress,.section{display:none!important}
+  .print-report{display:block!important}
+  .print-head{display:flex;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:14px}
+  .print-logo{font-size:25px;font-weight:900}.print-logo span{color:var(--orange)}
+  .print-meta{text-align:right;font-size:10px;color:var(--muted)}
+  .print-report h1{font-size:29px;margin:25px 0 8px}
+  .print-report p{font-size:10px;color:var(--text-secondary)}
+  .print-list{margin:4px 0 0;padding-left:14px;font-size:10px;color:var(--text-secondary);line-height:1.5}
+  .print-list li{margin-bottom:2px}
+  .print-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .print-card{border:1px solid var(--line);border-radius:12px;padding:13px}
+  .print-card b{display:block;color:var(--orange-dark);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+  .print-card strong{display:block;margin:4px 0;font-size:15px;color:var(--text)}
+  .print-section{margin-top:18px}
+  .print-section h3{font-size:15px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .print-advice{border-left:4px solid var(--orange);background:var(--orange-bg-light);padding:13px 15px;border-radius:0 12px 12px 0}
+  .print-notes{min-height:90px;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;font-size:10px}
+  .print-schedule-day{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;break-inside:avoid;page-break-inside:avoid}
+  .print-schedule-day:first-child{margin-top:0}
+  .print-schedule-day>strong{display:block;color:var(--orange-dark);font-size:11px;margin-bottom:6px}
+  .print-schedule-groups{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+  .print-schedule-group{margin-top:6px}
+  .print-schedule-group>b{display:block;font-size:9.5px;color:var(--anthracite)}
+  .print-schedule-group ul{margin:2px 0 0;padding-left:16px;font-size:9.5px;color:var(--text-secondary);line-height:1.5}
+  .print-disclaimer{margin-top:18px;border-top:1px solid var(--line);padding-top:10px;font-size:8px!important;color:var(--muted)!important}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="logo">MORE<span>2B</span>FIT</div>
+    <div class="top-actions">
+      <button class="btn" onclick="resetIntake()">Nieuwe intake</button>
+      <button class="btn primary" onclick="preparePrint()">Print verslag</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-card">
+      <span class="eyebrow"><i class="ph ph-user-focus"></i> Persoonlijk gezondheidsadvies</span>
+      <h1>Van kennismaking naar een haalbaar plan.</h1>
+      <p>Gebruik deze intake samen met de klant. De tool ondersteunt het gesprek, maakt de huidige situatie zichtbaar en vertaalt die naar een realistisch beweegadvies.</p>
+    </div>
+    <aside class="summary-card">
+      <i class="ph ph-chats-circle"></i>
+      <div>
+        <strong>Dit is een gesprek, geen invuloefening.</strong>
+        <p>De scan is bewust kort, visueel en coachgericht — vul 'm samen met de klant in tijdens het gesprek. Niet ieder antwoord hoeft exact te zijn; het doel is een goed gesprek en een passend startplan.</p>
+      </div>
+    </aside>
+  </section>
+
+  <nav class="progress">
+    <div class="progress-grid">
+      <button class="active" data-jump="discover">1. Ontdekken</button>
+      <button data-jump="current">2. Huidige situatie</button>
+      <button data-jump="feasibility">3. Haalbaarheid</button>
+      <button data-jump="insight">4. Inzicht</button>
+      <button data-jump="advice">5. Advies</button>
+    </div>
+  </nav>
+
+  <section class="section" id="discover">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Stap 1</span>
+        <h2>Ontdek de echte hulpvraag</h2>
+        <p>Begin niet met cijfers, maar met de reden waarom iemand vandaag tegenover je zit.</p>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="field"><label>Naam klant</label><input id="clientName" type="text" placeholder="Voor- en achternaam"></div>
+      <div class="field"><label>Geboortedatum</label><input id="clientBirthdate" type="date"></div>
+      <div class="field"><label>E-mailadres</label><input id="clientEmail" type="email" placeholder="naam@voorbeeld.nl"></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:18px">
+      <div class="field"><label>Noodcontact (naam en telefoonnummer)</label><input id="emergencyContact" type="text" placeholder="Bijvoorbeeld: Partner, 06-12345678"></div>
+      <div class="field">
+        <label for="referralSource">Hoe ken je MORE2BFIT?</label>
+        <select id="referralSource" class="field-select">
+          <option value="">Maak een keuze</option>
+          <option value="google">Google / internet</option>
+          <option value="social">Social media</option>
+          <option value="recommendation">Aanbeveling van iemand</option>
+          <option value="walkin">Langsgelopen / in de buurt</option>
+          <option value="event">Evenement of actie</option>
+          <option value="other">Anders</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="safety-field">
+      <label><i class="ph ph-heartbeat"></i> Blessures, klachten of medische aandachtspunten</label>
+      <p class="field-help" style="margin:4px 0 0">Vink aan wat van toepassing is. Dit wordt automatisch gebruikt om oefeningen te vermijden of juist te adviseren.</p>
+      <div class="injury-choice-grid" id="injuryChoiceGrid" style="margin-top:14px">
+        <button type="button" class="injury-choice" data-injury="rug">Lage rugklachten</button>
+        <button type="button" class="injury-choice" data-injury="knie">Knieklachten</button>
+        <button type="button" class="injury-choice" data-injury="knie_acuut">Knieklachten (kan nog niet bewegen door pijn)</button>
+        <button type="button" class="injury-choice" data-injury="schouder">Schouderklachten</button>
+        <button type="button" class="injury-choice" data-injury="nek">Nek- / whiplashklachten</button>
+        <button type="button" class="injury-choice" data-injury="hart">Hart- / vaatklachten</button>
+        <button type="button" class="injury-choice" data-injury="nieuwe_heup">Nieuwe heup (heupprothese)</button>
+        <button type="button" class="injury-choice" data-injury="bursitis">Slijmbeursontsteking (bursitis)</button>
+        <button type="button" class="injury-choice" data-injury="tennisarm">Tennisarm</button>
+        <button type="button" class="injury-choice" data-injury="frozen_shoulder">Frozen shoulder</button>
+        <button type="button" class="injury-choice" data-injury="artrose">Artrose / gewrichtsklachten</button>
+        <button type="button" class="injury-choice" data-injury="osteoporose">Osteoporose</button>
+        <button type="button" class="injury-choice" data-injury="zwangerschap">Zwanger (huidig)</button>
+        <button type="button" class="injury-choice" data-injury="bekkenklachten_postpartum">Bekkenklachten na bevalling</button>
+        <button type="button" class="injury-choice" data-injury="diastase_postpartum">Diastase (buikspieren) na bevalling</button>
+        <button type="button" class="injury-choice" data-injury="enkel">Enkel- / instabiliteit</button>
+        <button type="button" class="injury-choice" data-injury="pols">Pols- / elleboogklachten</button>
+        <button type="button" class="injury-choice" data-injury="hartpatient">Hartpatiënt (na infarct/hartoperatie)</button>
+        <button type="button" class="injury-choice" data-injury="diabetes2">Diabetes type 2</button>
+      </div>
+      <p class="field-help" style="margin:18px 0 0;font-weight:800;color:var(--anthracite)">Medicijngebruik</p>
+      <p class="field-help" style="margin:2px 0 0">Bepaalde medicatie beïnvloedt hoe iemand op inspanning reageert. Vink aan wat van toepassing is.</p>
+      <div class="injury-choice-grid" id="medicationChoiceGrid" style="margin-top:12px">
+        <button type="button" class="injury-choice" data-injury="betablokkers">Bètablokkers</button>
+        <button type="button" class="injury-choice" data-injury="antidepressiva">Antidepressiva</button>
+        <button type="button" class="injury-choice" data-injury="bloedverdunners">Bloedverdunners</button>
+        <button type="button" class="injury-choice" data-injury="statines">Statines (cholesterolverlagers)</button>
+      </div>
+      <textarea id="healthNotes" style="margin-top:14px" placeholder="Eventuele toelichting, overige klachten of medicijngebruik. Vul 'geen bijzonderheden' in als dit niet van toepassing is."></textarea>
+    </div>
+
+    <div class="consent-field">
+      <input id="privacyConsent" type="checkbox">
+      <label for="privacyConsent">Ik ga akkoord dat MORE2BFIT deze gegevens gebruikt om het intakeadvies op te stellen en de samenvatting op verzoek naar mijn e-mailadres te sturen.</label>
+    </div>
+
+    
+    <h3>Wat zijn de belangrijkste redenen om vandaag hier te zijn?</h3>
+    <p class="field-help">Kies maximaal drie redenen. De volgorde waarin je kiest bepaalt de prioriteit in het eindadvies.</p>
+
+    <div class="reason-choice-grid" id="reasonChoiceGrid">
+      <button type="button" class="reason-choice" data-reason="energy">
+        <span class="reason-order"></span>
+        <i class="ph ph-battery-high"></i>
+        <strong>Meer energie</strong>
+        <small>Fitter voelen in werk en dagelijks leven.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="condition">
+        <span class="reason-order"></span>
+        <i class="ph ph-heartbeat"></i>
+        <strong>Conditie verbeteren</strong>
+        <small>Inspanningen gemakkelijker en langer volhouden.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="weight">
+        <span class="reason-order"></span>
+        <i class="ph ph-scales"></i>
+        <strong>Afvallen</strong>
+        <small>Gezonder gewicht en betere lichaamssamenstelling.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="strength">
+        <span class="reason-order"></span>
+        <i class="ph ph-barbell"></i>
+        <strong>Sterker worden</strong>
+        <small>Meer spierkracht en dagelijkse belastbaarheid.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="painfree">
+        <span class="reason-order"></span>
+        <i class="ph ph-person-simple-walk"></i>
+        <strong>Minder klachten</strong>
+        <small>Met meer vertrouwen en comfort bewegen.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="health">
+        <span class="reason-order"></span>
+        <i class="ph ph-shield-check"></i>
+        <strong>Fitter ouder worden</strong>
+        <small>Gezondheid, zelfstandigheid en spiermassa behouden.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="muscle">
+        <span class="reason-order"></span>
+        <i class="ph ph-person-simple-run"></i>
+        <strong>Spiermassa opbouwen</strong>
+        <small>Gericht werken aan spierontwikkeling en herstel.</small>
+      </button>
+
+      <button type="button" class="reason-choice" data-reason="social">
+        <span class="reason-order"></span>
+        <i class="ph ph-users-three"></i>
+        <strong>Sociale contacten</strong>
+        <small>Samen sporten en aansluiting bij anderen.</small>
+      </button>
+    </div>
+
+    <div class="reason-limit-message" id="reasonLimitMessage"></div>
+
+    <div class="field" style="margin-top:18px">
+      <label>Sportervaring</label>
+      <textarea id="sportsBackground" placeholder="Eerder lid geweest van een sportschool? Wat beviel wel of niet, en waarom is dat gestopt of nooit begonnen?"></textarea>
+    </div>
+
+    <div class="field" style="margin-top:18px">
+      <label>Wat is het trainingsniveau?</label>
+      <p class="field-help" style="margin:4px 0 0">Bepaalt de belasting en reps/sets in het trainingsadvies bij Stap 5.</p>
+      <div class="choice-grid" data-group="experience" style="margin-top:12px">
+        <button class="choice active" data-value="beginner"><i class="ph ph-seedling"></i><strong>Beginner</strong><span>Nooit of lang niet getraind.</span></button>
+        <button class="choice" data-value="gemiddeld"><i class="ph ph-trend-up"></i><strong>Gemiddeld</strong><span>Af en toe of het afgelopen jaar getraind.</span></button>
+        <button class="choice" data-value="gevorderd"><i class="ph ph-medal"></i><strong>Gevorderd</strong><span>Langer dan een jaar consistent getraind.</span></button>
+      </div>
+    </div>
+
+    <div class="grid-2 subjective-grid">
+      <div class="field">
+        <label for="conditionRating">Hoe beoordeel je jouw huidige conditie?</label>
+        <div class="subjective-scale">
+          <div class="scale-top">
+            <span>Zeer slecht</span>
+            <strong><span id="conditionRatingValue">5</span>/10</strong>
+            <span>Uitstekend</span>
+          </div>
+          <input id="conditionRating" type="range" min="1" max="10" value="5" step="1">
+          <p>Denk aan traplopen, stevig wandelen en inspanningen volhouden.</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="energyRating">Hoeveel energie heb je op een gemiddelde dag?</label>
+        <div class="subjective-scale">
+          <div class="scale-top">
+            <span>Weinig energie</span>
+            <strong><span id="energyRatingValue">5</span>/10</strong>
+            <span>Veel energie</span>
+          </div>
+          <input id="energyRating" type="range" min="1" max="10" value="5" step="1">
+          <p>Het gaat om jouw algemene gevoel van fitheid gedurende de dag.</p>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="field"><label>Wat wil je over zes maanden bereikt hebben?</label><textarea id="sixMonthGoal" placeholder="Noteer het antwoord in de woorden van de klant."></textarea></div>
+      <div class="field"><label>Waarom is dit belangrijk voor je?</label><textarea id="motivation" placeholder="Wat verandert er in het dagelijks leven als dit lukt?"></textarea></div>
+    </div>
+
+    <h3>Hoeveel vertrouwen heb je dat dit gaat lukken?</h3>
+    <div class="score-scale" id="confidenceScale"></div>
+  </section>
+
+  <section class="section" id="current">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Stap 2</span>
+        <h2>Breng het huidige beweegpatroon in kaart</h2>
+        <p>Vul per activiteit in hoe vaak, hoe lang en hoe intensief iemand beweegt. De bijdrage aan de beweegscore wordt direct zichtbaar.</p>
+      </div>
+    </div>
+
+    <div class="activity-table">
+      <div class="activity-row activity-head">
+        <span>Activiteit</span>
+        <span>Keer per week</span>
+        <span>Minuten per keer</span>
+        <span>Intensiteit</span>
+        <span>Bijdrage</span>
+      </div>
+
+      <div class="activity-row" data-activity="walk">
+        <div class="activity-name"><i class="ph ph-person-simple-walk"></i><div><strong>Wandelen</strong><small>Recreatief of stevig tempo</small></div></div>
+        <div class="input-field"><span class="mobile-field-label">Keer per week</span><input class="act-frequency" type="number" min="0" max="14" value="0"></div>
+        <div class="input-field"><span class="mobile-field-label">Minuten per keer</span><input class="act-duration" type="number" min="0" max="240" value="30"></div>
+        <select class="act-intensity">
+          <option value="0.7">Rustig</option>
+          <option value="1" selected>Matig</option>
+          <option value="1.3">Stevig</option>
+        </select>
+        <div class="activity-contribution"><strong>0</strong><small>scorepunten</small></div>
+      </div>
+
+      <div class="activity-row" data-activity="bike">
+        <div class="activity-name"><i class="ph ph-bicycle"></i><div><strong>Fietsen</strong><small>Dagelijks vervoer of recreatief</small></div></div>
+        <div class="input-field"><span class="mobile-field-label">Keer per week</span><input class="act-frequency" type="number" min="0" max="14" value="0"></div>
+        <div class="input-field"><span class="mobile-field-label">Minuten per keer</span><input class="act-duration" type="number" min="0" max="240" value="30"></div>
+        <select class="act-intensity">
+          <option value="0.8">Rustig</option>
+          <option value="1.1" selected>Matig</option>
+          <option value="1.4">Stevig</option>
+        </select>
+        <div class="activity-contribution"><strong>0</strong><small>scorepunten</small></div>
+      </div>
+
+      <div class="activity-row" data-activity="sport">
+        <div class="activity-name"><i class="ph ph-barbell"></i><div><strong>Fitness of sport</strong><small>Krachttraining, groepsles of sport</small></div></div>
+        <div class="input-field"><span class="mobile-field-label">Keer per week</span><input class="act-frequency" type="number" min="0" max="14" value="0"></div>
+        <div class="input-field"><span class="mobile-field-label">Minuten per keer</span><input class="act-duration" type="number" min="0" max="240" value="60"></div>
+        <select class="act-intensity">
+          <option value="1">Licht</option>
+          <option value="1.3" selected>Gemiddeld</option>
+          <option value="1.6">Intensief</option>
+        </select>
+        <div class="activity-contribution"><strong>0</strong><small>scorepunten</small></div>
+      </div>
+
+      <div class="activity-row" data-activity="work">
+        <div class="activity-name"><i class="ph ph-briefcase"></i><div><strong>Actief werk of huishouden</strong><small>Fysiek werk, tuinieren of zwaar huishouden</small></div></div>
+        <div class="input-field"><span class="mobile-field-label">Keer per week</span><input class="act-frequency" type="number" min="0" max="7" value="0"></div>
+        <div class="input-field"><span class="mobile-field-label">Minuten per keer</span><input class="act-duration" type="number" min="0" max="480" value="60"></div>
+        <select class="act-intensity">
+          <option value="0.5">Licht</option>
+          <option value="0.8" selected>Matig</option>
+          <option value="1.1">Zwaar</option>
+        </select>
+        <div class="activity-contribution"><strong>0</strong><small>scorepunten</small></div>
+      </div>
+    </div>
+
+    <div class="pattern-summary">
+      <div>
+        <span>Totaal actieve minuten</span>
+        <strong id="patternMinutes">0</strong>
+        <small>per week</small>
+      </div>
+      <div>
+        <span>Gewogen beweegminuten</span>
+        <strong id="weightedMinutes">0</strong>
+        <small>rekening houdend met intensiteit</small>
+      </div>
+      <div>
+        <span>Krachtmomenten</span>
+        <strong id="patternStrength">0</strong>
+        <small>per week</small>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="field">
+        <label>Gemiddeld aantal zittende uren per dag</label>
+        <input id="sittingHours" type="number" min="0" max="20" value="8">
+      </div>
+      <div class="field">
+        <label>Hoe zwaar voelt een normale week?</label>
+        <select id="weekLoad">
+          <option value="0">Licht en goed vol te houden</option>
+          <option value="1" selected>Gemiddeld</option>
+          <option value="2">Druk en vermoeiend</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:22px">
+      <div class="field">
+        <label for="nutritionPattern">Hoe ziet jouw voedingspatroon er over het algemeen uit?</label>
+        <select id="nutritionPattern" class="field-select">
+          <option value="regular" selected>Regelmatig en gevarieerd</option>
+          <option value="irregular">Wisselend, soms overgeslagen maaltijden</option>
+          <option value="processed">Vaak bewerkt voedsel of buiten de deur eten</option>
+          <option value="restrictive">Bewust beperkend (dieet, allergie, intolerantie)</option>
+          <option value="unsure">Nog niet besproken</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sleepRating">Hoe is de slaapkwaliteit gemiddeld?</label>
+        <div class="subjective-scale">
+          <div class="scale-top">
+            <span>Slecht</span>
+            <strong><span id="sleepRatingValue">5</span>/10</strong>
+            <span>Uitstekend</span>
+          </div>
+          <input id="sleepRating" type="range" min="1" max="10" value="5" step="1">
+          <p>Denk aan inslapen, doorslapen en uitgerust wakker worden.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:16px">
+      De beweegscore gebruikt frequentie, duur, intensiteit, krachttraining en zitgedrag. De klant hoeft dus niet zelf te weten hoeveel een activiteit “waard” is.
+    </p>
+  </section>
+
+  <section class="section" id="feasibility">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Stap 3</span>
+        <h2>Wat is echt haalbaar?</h2>
+        <p>Laat het advies aansluiten bij de agenda van de klant, niet alleen bij de ambitie.</p>
+      </div>
+    </div>
+
+    <h3>Hoe vaak kun je de komende drie maanden echt sporten?</h3>
+    <div class="choice-grid" data-group="frequency">
+      <button class="choice" data-value="1"><i class="ph ph-number-circle-one"></i><strong>1× per week</strong><span>Een vaste, haalbare basis.</span></button>
+      <button class="choice active" data-value="2"><i class="ph ph-number-circle-two"></i><strong>2× per week</strong><span>Goede balans tussen resultaat en volhouden.</span></button>
+      <button class="choice" data-value="3"><i class="ph ph-number-circle-three"></i><strong>3× per week</strong><span>Meer trainingsvolume en flexibiliteit.</span></button>
+      <button class="choice" data-value="4"><i class="ph ph-number-circle-four"></i><strong>4× per week</strong><span>Upper/lower-opbouw voor meer frequentie per spiergroep.</span></button>
+      <button class="choice" data-value="0"><i class="ph ph-arrows-clockwise"></i><strong>Wisselend</strong><span>Een flexibel plan met minimale ondergrens.</span></button>
+    </div>
+
+    <h3 style="margin-top:26px">Welke vorm van begeleiding past het beste?</h3>
+    <div class="choice-grid" data-group="support">
+      <button class="choice" data-value="independent"><i class="ph ph-person-simple-run"></i><strong>Zelfstandig</strong><span>Uitleg bij de start, daarna zelf trainen.</span></button>
+      <button class="choice active" data-value="start"><i class="ph ph-route"></i><strong>Hulp bij de start</strong><span>Een duidelijk schema en uitleg van oefeningen.</span></button>
+      <button class="choice" data-value="regular"><i class="ph ph-arrows-clockwise"></i><strong>Regelmatige coaching</strong><span>Vaste evaluatiemomenten en bijsturing.</span></button>
+      <button class="choice" data-value="personal"><i class="ph ph-user-check"></i><strong>Persoonlijke begeleiding</strong><span>Vaste afspraak en volledig persoonlijke coaching.</span></button>
+      <button class="choice" data-value="social"><i class="ph ph-users-three"></i><strong>Samen trainen</strong><span>Extra motivatie door een partner of kleine groep.</span></button>
+      <button class="choice" data-value="unsure"><i class="ph ph-chat-centered-dots"></i><strong>Nog bespreken</strong><span>De trainer helpt de beste vorm kiezen.</span></button>
+    </div>
+
+    <h3 style="margin-top:26px">Welke spiergroepen vind je belangrijk om te trainen?</h3>
+    <p class="field-help">Kies maximaal vier spiergroepen. Dit bepaalt de focus van het automatisch voorgestelde trainingsschema hieronder bij Stap 5.</p>
+    <div class="muscle-choice-grid" id="muscleChoiceGrid">
+      <button type="button" class="muscle-choice" data-muscle="borst"><i class="ph ph-heart"></i><span>Borst</span></button>
+      <button type="button" class="muscle-choice" data-muscle="rug"><i class="ph ph-arrows-in"></i><span>Rug</span></button>
+      <button type="button" class="muscle-choice" data-muscle="benen"><i class="ph ph-person-simple-walk"></i><span>Benen</span></button>
+      <button type="button" class="muscle-choice" data-muscle="bilspieren"><i class="ph ph-person-simple-run"></i><span>Bilspieren</span></button>
+      <button type="button" class="muscle-choice" data-muscle="buik"><i class="ph ph-circle-dashed"></i><span>Buik / Core</span></button>
+      <button type="button" class="muscle-choice" data-muscle="schouders"><i class="ph ph-arrows-out"></i><span>Schouders</span></button>
+      <button type="button" class="muscle-choice" data-muscle="armen"><i class="ph ph-hand-fist"></i><span>Armen</span></button>
+      <button type="button" class="muscle-choice" data-muscle="conditie"><i class="ph ph-heartbeat"></i><span>Cardio / conditie</span></button>
+    </div>
+    <div class="reason-limit-message" id="muscleLimitMessage"></div>
+
+    <div class="grid-3" style="margin-top:22px">
+      <div class="field"><label>Gewenste startdatum</label><input id="startDate" type="date"></div>
+      <div class="field"><label>Voorkeursdagen / tijden</label><textarea id="availability" placeholder="Bijvoorbeeld dinsdagavond en vrijdagochtend."></textarea></div>
+      <div class="field"><label>Mogelijke belemmeringen</label><textarea id="barriers" placeholder="Werk, gezin, klachten, onzekerheid, eerdere ervaringen..."></textarea></div>
+    </div>
+  </section>
+
+  <section class="section" id="insight">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Stap 4</span>
+        <h2>Maak de ontwikkeling zichtbaar</h2>
+        <p>De Gezondheidsscore kijkt breder dan alleen de beweegrichtlijn. Ook structuur, vertrouwen en belastbaarheid tellen mee.</p>
+      </div>
+    </div>
+
+    <div class="health-score-overview">
+      <div class="health-score-card current">
+        <span class="health-score-label">Huidige Gezondheidsscore</span>
+        <div class="health-score-number"><strong id="currentHealthScore">0</strong><small>/100</small></div>
+        <span class="health-score-profile" id="currentHealthProfile">Startfase</span>
+      </div>
+
+      <div class="health-score-change">
+        <i class="ph ph-arrow-right"></i>
+        <strong id="healthPointGain">+0 punten</strong>
+        <span>verwachte ontwikkeling</span>
+      </div>
+
+      <div class="health-score-card future">
+        <span class="health-score-label">Verwachting na 8–12 weken</span>
+        <div class="health-score-number"><strong id="futureHealthScore">0</strong><small>/100</small></div>
+        <span class="health-score-profile" id="futureHealthProfile">In opbouw</span>
+      </div>
+    </div>
+
+    <div class="health-score-note">
+      <i class="ph ph-info"></i>
+      <p>Een score van 100 is uitzonderlijk. Twee keer per week fitness verbetert vooral kracht, beweging en geleidelijk de conditie, maar maakt andere onderdelen niet automatisch maximaal.</p>
+    </div>
+
+    <div class="health-domains">
+      <div class="domain-head">
+        <div>
+          <span>Onderdeel</span>
+        </div>
+        <div class="domain-legend">
+          <span><i class="legend-dot current-dot"></i>Nu</span>
+          <span><i class="legend-dot future-dot"></i>Na 8–12 weken</span>
+        </div>
+      </div>
+
+      <div class="domain-row">
+        <div class="domain-title"><i class="ph ph-person-simple-run"></i><div><strong>Beweging</strong><small>Totale wekelijkse beweegprikkel</small></div></div>
+        <div class="domain-bars">
+          <div class="domain-track"><div class="domain-fill current-fill" id="movementCurrentBar"></div></div>
+          <div class="domain-track"><div class="domain-fill future-fill" id="movementFutureBar"></div></div>
+        </div>
+        <div class="domain-values"><span id="movementCurrentValue">0</span><strong id="movementFutureValue">0</strong></div>
+      </div>
+
+      <div class="domain-row">
+        <div class="domain-title"><i class="ph ph-barbell"></i><div><strong>Kracht</strong><small>Wekelijkse krachtprikkel</small></div></div>
+        <div class="domain-bars">
+          <div class="domain-track"><div class="domain-fill current-fill" id="strengthCurrentBar"></div></div>
+          <div class="domain-track"><div class="domain-fill future-fill" id="strengthFutureBar"></div></div>
+        </div>
+        <div class="domain-values"><span id="strengthCurrentValue">0</span><strong id="strengthFutureValue">0</strong></div>
+      </div>
+
+
+      <div class="domain-row">
+        <div class="domain-title"><i class="ph ph-heartbeat"></i><div><strong>Conditie</strong><small>Inspanning kunnen volhouden en herstellen</small></div></div>
+        <div class="domain-bars">
+          <div class="domain-track"><div class="domain-fill current-fill" id="conditionCurrentBar"></div></div>
+          <div class="domain-track"><div class="domain-fill future-fill" id="conditionFutureBar"></div></div>
+        </div>
+        <div class="domain-values"><span id="conditionCurrentValue">0</span><strong id="conditionFutureValue">0</strong></div>
+      </div>
+
+      <div class="domain-row">
+        <div class="domain-title"><i class="ph ph-lightning"></i><div><strong>Energie & fitheid</strong><small>Ervaren energie en algehele fitheid</small></div></div>
+        <div class="domain-bars">
+          <div class="domain-track"><div class="domain-fill current-fill" id="energyCurrentBar"></div></div>
+          <div class="domain-track"><div class="domain-fill future-fill" id="energyFutureBar"></div></div>
+        </div>
+        <div class="domain-values"><span id="energyCurrentValue">0</span><strong id="energyFutureValue">0</strong></div>
+      </div>
+
+    </div>
+</section>
+
+  <section class="section" id="advice">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Stap 5</span>
+        <h2>Van inzicht naar een concreet startplan</h2>
+        <p>Het advies combineert doel, haalbaarheid, huidige activiteit en begeleidingsbehoefte.</p>
+      </div>
+    </div>
+
+    <div class="advice-layout">
+      <div class="advice-card">
+        <span class="price" id="advicePrice">€39,95 per maand</span>
+        <h3 id="adviceName">Fitness 2× per week</h3>
+        <p id="adviceText"></p>
+        <div class="reason-list" id="reasonList"></div>
+      </div>
+      <div class="plan-card">
+        <span class="section-kicker">Eerste maand</span>
+        <h3 style="margin:8px 0 18px;color:var(--anthracite)">Een duidelijke start</h3>
+        <div class="plan-grid">
+          <div class="plan-week"><b>Week 1</b><span>Intake, uitleg en eerste training.</span></div>
+          <div class="plan-week"><b>Week 2</b><span>Techniek en trainingsritme vastleggen.</span></div>
+          <div class="plan-week"><b>Week 3</b><span>Belasting rustig uitbreiden.</span></div>
+          <div class="plan-week"><b>Week 4</b><span>Korte evaluatie en bijsturen.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="training-advice" id="trainingAdvice" style="margin-top:24px">
+      <span class="section-kicker">Automatisch trainingsadvies</span>
+      <h3 style="margin:8px 0 4px;color:var(--anthracite)">Aandachtspunten en oefenadvies</h3>
+      <p class="note" style="margin-top:0">Gebaseerd op de aangevinkte blessures (Stap 1), gekozen spiergroepen en trainingsfrequentie (Stap 3).</p>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="advice-callout avoid">
+          <b><i class="ph ph-x-circle"></i> Let op / vermijd bij deze klachten</b>
+          <ul id="injuryAvoidList"></ul>
+          <p class="empty" id="injuryAvoidEmpty">Geen blessures aangevinkt bij Stap 1.</p>
+        </div>
+        <div class="advice-callout prefer">
+          <b><i class="ph ph-check-circle"></i> Juist wel geschikt</b>
+          <ul id="injuryPreferList"></ul>
+          <p class="empty" id="injuryPreferEmpty">Geen blessures aangevinkt bij Stap 1.</p>
+        </div>
+      </div>
+
+      <div class="safety-field" id="postpartumReferralNote" style="display:none;margin-top:14px">
+        <label><i class="ph ph-user-focus"></i> Aanbevolen: doorverwijzen</label>
+        <p class="field-help" style="margin:6px 0 0;color:#7a6a5c" id="postpartumReferralText"></p>
+      </div>
+
+      <div id="protocolSection" style="display:none;margin-top:16px"></div>
+
+      <div class="muscle-advice-grid" id="muscleAdviceGrid" style="margin-top:16px"></div>
+      <p class="note" id="muscleAdviceEmpty" style="display:none">Kies bij Stap 3 spiergroepen om hier oefensuggesties te zien.</p>
+
+      <h3 style="margin:22px 0 4px;color:var(--anthracite)">Voorgesteld trainingsschema</h3>
+      <div class="advice-callout" id="repRangeNote" style="margin-bottom:14px">
+        <b><i class="ph ph-repeat"></i> Aanbevolen reps &amp; sets bij dit doel</b>
+        <p class="empty" id="repRangeText" style="color:#666;font-size:12.5px;margin:8px 0 0"></p>
+      </div>
+      <div class="week-schedule" id="weekScheduleGrid"></div>
+
+      <p class="note" style="margin-top:14px">Dit schema is een automatisch gegenereerd startpunt op basis van de intake. De trainer stelt het definitieve schema samen, controleert de uitvoering en past dit aan waar nodig. Rep-ranges zijn gebaseerd op de ACSM Resistance Training Position Stand (2026) en NSCA-trainingsrichtlijnen; het zijn praktische richtwaarden, geen medisch voorschrift. Bij een beginnend niveau krijgen machine- en bodyweight-oefeningen voorrang vanwege de vaste beweegbaan; bij een gevorderd niveau juist vrije gewichten.</p>
+    </div>
+
+    <div class="coach-panel" style="margin-top:20px">
+      <div class="field"><label>Coachnotities</label><textarea id="coachNotes" placeholder="Belangrijkste observaties, afspraken en aandachtspunten."></textarea></div>
+      <div class="field"><label>Concrete vervolgafspraak</label><textarea id="nextStep" placeholder="Bijvoorbeeld: proeftraining dinsdag 19:00, daarna evaluatie."></textarea></div>
+    </div>
+
+    <div class="actionbar" style="flex-wrap:wrap">
+      <p class="note">De uitslag ondersteunt het intakegesprek. Bij medische klachten of twijfel blijft overleg met een arts of behandelaar belangrijk.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="pdfSaveBtn" onclick="downloadSummaryPDF()"><i class="ph ph-file-pdf"></i> PDF opslaan</button>
+        <button class="btn primary" onclick="preparePrint()"><i class="ph ph-printer"></i> Print intakeverslag</button>
+      </div>
+    </div>
+    <p class="note" id="pdfStatus" style="margin-top:10px;text-align:right"></p>
+  </section>
+</main>
+
+<section class="print-report" id="printReport">
+  <div class="print-head">
+    <div class="print-logo">MORE<span>2B</span>FIT</div>
+    <div class="print-meta">Persoonlijk gezondheidsadvies<br><span id="printDate"></span></div>
+  </div>
+  <h1>Persoonlijk intakeverslag</h1>
+  <p>Samenvatting van het gesprek, het huidige beweegpatroon en het voorgestelde startplan.</p>
+  <div class="print-grid">
+    <div class="print-card"><b>Klant</b><strong id="pName"></strong><p id="pAge"></p></div>
+    <div class="print-card"><b>Beweegprofiel</b><strong id="pProfile"></strong><p id="pScore"></p></div>
+    <div class="print-card"><b>Huidig patroon</b><strong id="pCurrent"></strong><p id="pCurrentStrength"></p></div>
+    <div class="print-card"><b>Nieuw patroon</b><strong id="pNew"></strong><p id="pNewStrength"></p></div>
+  </div>
+
+  <div class="print-section">
+    <h3>Gezondheid en achtergrond</h3>
+    <div class="print-grid">
+      <div class="print-card"><b>Blessures / medische aandachtspunten</b><strong id="pHealthNotes"></strong></div>
+      <div class="print-card"><b>Sportervaring</b><strong id="pSportsBackground"></strong></div>
+      <div class="print-card"><b>Voedingspatroon</b><strong id="pNutrition"></strong></div>
+      <div class="print-card"><b>Slaapkwaliteit</b><strong id="pSleep"></strong></div>
+    </div>
+  </div>
+
+  <div class="print-section">
+    <h3>Praktische gegevens</h3>
+    <div class="print-grid">
+      <div class="print-card"><b>Noodcontact</b><strong id="pEmergencyContact"></strong></div>
+      <div class="print-card"><b>Gewenste startdatum</b><strong id="pStartDate"></strong></div>
+    </div>
+  </div>
+
+  <div class="print-section">
+    <h3>Hulpvraag en motivatie</h3>
+    <div class="print-grid">
+      <div class="print-card"><b>Belangrijkste doel</b><strong id="pGoal"></strong><p id="pSixMonth"></p></div>
+      <div class="print-card"><b>Waarom dit belangrijk is</b><strong id="pConfidence"></strong><p id="pMotivation"></p></div>
+    </div>
+  </div>
+
+  <div class="print-section">
+    <h3>Persoonlijk advies</h3>
+    <div class="print-advice"><strong id="pAdvice"></strong><p id="pAdviceText"></p></div>
+  </div>
+
+  <div class="print-section">
+    <h3>Trainingsadvies op basis van blessures</h3>
+    <div class="print-grid">
+      <div class="print-card"><b>Vermijd</b><ul class="print-list" id="pInjuryAvoid"></ul></div>
+      <div class="print-card"><b>Juist wel geschikt</b><ul class="print-list" id="pInjuryPrefer"></ul></div>
+    </div>
+    <p class="print-notes" id="pPostpartumReferral" style="display:none"></p>
+    <div class="print-notes" id="pProtocol"></div>
+  </div>
+
+  <div class="print-section">
+    <h3>Voorgesteld trainingsschema</h3>
+    <div class="print-notes" id="pWeekSchedule"></div>
+  </div>
+
+  <div class="print-section">
+    <h3>Verwachte verandering</h3>
+    <div class="print-grid">
+      <div class="print-card"><b>Gezondheidsscore</b><strong id="pScoreGain"></strong><p>Verwachte vooruitgang in beweegscorepunten ten opzichte van het huidige patroon.</p></div>
+      <div class="print-card"><b>Huidig → nieuw</b><strong id="pScoreComparison"></strong><p>Samengestelde score op basis van beweging, kracht, conditie en energie.</p></div>
+      <div class="print-card"><b>Actieve minuten</b><strong id="pMinutesGain"></strong><p>Onderliggende verandering in wekelijkse activiteit.</p></div>
+      <div class="print-card"><b>Kracht & structuur</b><strong><span id="pStrengthGain"></span> · <span id="pRoutineGain"></span></strong><p>Ondersteunende factoren binnen het nieuwe patroon.</p></div>
+    </div>
+  </div>
+
+  <div class="print-section">
+    <h3>Coachnotities</h3>
+    <div class="print-notes" id="pNotes"></div>
+  </div>
+
+  <div class="print-section">
+    <h3>Vervolgafspraak</h3>
+    <div class="print-notes" id="pNext"></div>
+  </div>
+
+  <p class="print-disclaimer">Dit verslag is informatief en geen medische diagnose of garantie op resultaat. De Gezondheidsscore is een praktische voortgangsindicator op basis van de ingevoerde antwoorden. Werkelijke resultaten hangen af van trainingsinhoud, intensiteit, herstel, voeding, gezondheid en consistentie.</p>
+</section>
+
+<script>
+const state={reasons:[],
+  goal:"energy",confidence:7,frequency:2,support:"start",
+  sittingHours:8,injuries:[],muscles:[],experience:"beginner"
+};
+
+// Vul hier, zodra het backend-scriptje ergens gehost is, de eigen server-URL in.
+// Bijvoorbeeld: "https://more2bfit-bridge.onrender.com"
+// Zolang dit leeg staat, is de VirtuaGym-knop uitgeschakeld.
+const BACKEND_URL="";
+const goalLabels={energy:"Meer energie",lose:"Afvallen",strong:"Sterker worden",pain:"Minder klachten",healthy:"Fitter ouder worden",condition:"Conditie verbeteren"};
+
+const INJURY_LIBRARY={
+  rug:{label:"Lage rugklachten",avoid:["Deadlift met zwaar gewicht","Sit-Up / Crunch met volledige flexie","Rotatiemachine onder zware belasting"],prefer:["Dead Bug voor rugneutrale core-stabilisatie","Cable Row met neutrale rug","Leg Press met beperkte range","Stationary Bike of Rowing Machine met rechte rug"],note:"Focus op rompstabiliteit; vermijd diepe flexie of rotatie onder belasting."},
+  knie:{label:"Knieklachten",avoid:["Diepe Squat","Lunge met lange stap","Leg Extension met zwaar gewicht"],prefer:["Leg Press met beperkte diepte","Stationary Bike (lage weerstand)","Beenoefeningen in gesloten keten","Wandelen op vlakke ondergrond","Wall Sit of andere isometrische houdingen bij pijn tijdens beweging"],note:"Beperk diepe kniebuiging en hoge impact; bouw kracht rond de knie geleidelijk op. Bij pijn tijdens dynamische oefeningen kan isometrische (statische) belasting, zoals een Wall Sit op een comfortabele hoek, een goed startpunt zijn."},
+  knie_acuut:{label:"Knieklachten (kan nog niet bewegen door pijn)",avoid:["Alle dynamische been- en beenpersoefeningen totdat bewegen weer pijnvrij lukt","Squats, lunges en step-ups in elke vorm","Hardlopen, springen of traplopen als training"],prefer:["Isometrische (statische) oefeningen zoals een Wall Sit op een pijnvrije hoek","Balans- en stabilisatietraining, bijvoorbeeld staan op een Bosu-bal","Doorverwijzing naar een (sport)fysiotherapeut voor een opbouwschema"],note:"Bij pijn die bewegen zelf nog verhindert, is statische belasting vaak een beter startpunt dan dynamische oefeningen. Bouw pas op naar bewegend werk zodra dat pijnvrij kan, bij voorkeur onder begeleiding van een fysiotherapeut."},
+  schouder:{label:"Schouderklachten",avoid:["Overhead Press","Dips","Cable Pulldown achter het hoofd"],prefer:["Row met neutrale grip","Lateral Raise met licht gewicht","Scapulaire stabilisatie-oefeningen"],note:"Vermijd overhead belasting; werk aan schouderstabiliteit voordat volume wordt opgebouwd."},
+  nek:{label:"Nek- / whiplashklachten",avoid:["Shrugs met zwaar gewicht","Upright Row","Nekextensie-oefeningen"],prefer:["Houdingsgerichte rugoefeningen","Lichte mobiliteitsoefeningen nek","Ademhalings- en ontspanningsoefeningen"],note:"Rustig opbouwen, veel aandacht voor houding en ontspanning van nek/schoudergordel."},
+  hart:{label:"Hart- / vaatklachten",avoid:["Zware maximale krachttraining (1RM-testen)","Langdurige zeer hoge intensiteit intervallen","Oefeningen met lang ingehouden adem"],prefer:["Duurtraining in lage tot gematigde intensiteit","Krachttraining met gematigd gewicht en hogere herhalingen","Rustige opbouw met veel hersteltijd"],note:"Overleg met een arts vóór intensieve training; bouw intensiteit geleidelijk op.",protocol:["Zorg voor medische vrijgave voordat met (intensievere) training wordt gestart.","Bouw op met lage tot gematigde intensiteit; monitor inspanning op gevoel (RPE) in plaats van tot het uiterste te trainen.","Vermijd persen tegen gesloten stemspleet (Valsalva-manoeuvre) — blijf ademen tijdens elke herhaling.","Stop direct bij pijn op de borst, ongebruikelijke kortademigheid, duizeligheid of hartkloppingen, en zoek medische hulp."]},
+  nieuwe_heup:{label:"Nieuwe heup (heupprothese)",avoid:["Heupflexie voorbij 90° (bijv. diepe squats, ver doorbuigen op leg press)","Been kruisen over de middellijn (adductie voorbij midline)","Naar binnen draaien van het geopereerde been (interne rotatie)","Gecombineerde flexie, adductie en interne rotatie tegelijk"],prefer:["Leg Press en Leg Extension binnen beperkte, pijnvrije range","Stationary Bike met hoog zadel","Beenoefeningen in gesloten keten, geleidelijk opgebouwd","Wandelen, opbouwend in afstand en tempo"],note:"De exacte bewegingsbeperkingen verschillen per operatietechniek (voorste vs. achterste benadering) — neem dit door met de chirurg of fysiotherapeut voordat het trainingsschema wordt vastgesteld.",protocol:["Fase 1 (eerste weken): wandelen met hulpmiddel en lichte spieractivatie binnen de bewegingsbeperkingen.","Fase 2: geleidelijke opbouw van gesloten-keten krachtoefeningen (Leg Press, Stationary Bike) binnen pijnvrije range.","Fase 3: uitbreiden naar functionelere bewegingen zodra vrijgave is gegeven door chirurg of fysiotherapeut.","Stop bij toenemende pijn, zwelling of instabiliteitsgevoel en overleg met de behandelaar."]},
+  bursitis:{label:"Slijmbeursontsteking (bursitis)",avoid:["Overhead bewegingen zoals Overhead Press of zware Lat Pulldown","Plotselinge zware belasting van het aangedane gewricht","Bewegingen die scherpe pijn uitlokken"],prefer:["Rustige, gecontroleerde bewegingen binnen pijnvrije range","Scapulaire stabilisatie-oefeningen zoals Face Pull of Scapular Retraction","Geleidelijke belastingopbouw (niet meer dan circa 10% per week)"],note:"Meestal (maar niet uitsluitend) gerelateerd aan de schouder. In de acute fase is rust en het vermijden van herhaalde overhead-belasting belangrijk; bouw daarna geleidelijk op.",protocol:["Acute fase: ontlast het gewricht, vermijd pijnprovocerende bewegingen volledig.","Herstelfase: rustige, pijnvrije mobiliteit en lichte scapulaire stabilisatie.","Opbouwfase: geleidelijk terug naar functionele belasting, overhead-werk als laatste toevoegen.","Raadpleeg een fysiotherapeut of arts bij aanhoudende zwelling, roodheid of warmte van het gewricht."]},
+  tennisarm:{label:"Tennisarm (laterale epicondylitis)",avoid:["Zware grip-afhankelijke oefeningen (bijv. Barbell Curl, Pull-Up, Deadlift met dikke stang)","Herhaalde polsextensie onder weerstand tot scherpe pijn","Plotselinge zware belasting van de onderarm"],prefer:["Geleidelijke, pijnvrije belasting van de polsstrekkers","Oefeningen met lichte belasting en neutrale grip","Isometrische grip-oefeningen als startpunt bij acute pijn"],note:"Onderzoek laat zien dat geleidelijke belastingopbouw effectiever is dan volledige rust. Lichte spanning mag, scherpe pijn niet — bouw gewicht en herhalingen stap voor stap op.",protocol:["Fase 1: isometrische belasting van de polsstrekkers, pijnvrij houden.","Fase 2: langzame, gecontroleerde belasting met licht gewicht (concentrisch én excentrisch).","Fase 3: geleidelijk gewicht en volume opbouwen, functionele grip-oefeningen toevoegen.","Bouw circa 6-10 weken consistent op; bij uitblijvend herstel doorverwijzen naar een fysiotherapeut."]},
+  frozen_shoulder:{label:"Frozen shoulder (bevroren schouder)",avoid:["Geforceerd rekken of doorduwen door pijn heen","Zware overhead-belasting (Overhead Press, zware Lat Pulldown)","Plotselinge, snelle schouderbewegingen"],prefer:["Zachte, actieve mobiliteit binnen de beschikbare (pijnvrije) range","Scapulaire en rotator cuff-stabilisatie met licht gewicht","Onderlichaam- en coretraining om actief te blijven zonder de schouder te belasten"],note:"Frozen shoulder verloopt in fasen (bevriezen, bevroren, ontdooien) en herstelt vaak vanzelf over meerdere maanden tot jaren. Forceren van rek verergert doorgaans de klachten; geduldige, geleidelijke opbouw werkt beter.",protocol:["Bevriezingsfase (pijnlijk, afnemende mobiliteit): focus op pijnvrije mobiliteit en de rest van het lichaam blijven trainen.","Bevroren fase (stijf, minder pijn): voorzichtige, actieve mobiliteitsoefeningen binnen de grens.","Ontdooiingsfase (mobiliteit keert terug): geleidelijk kracht en volledige bewegingsuitslag opbouwen.","Overleg met een fysiotherapeut voor begeleide mobilisatie, vooral als de mobiliteit niet vanzelf verbetert."]},
+  artrose:{label:"Artrose / gewrichtsklachten",avoid:["Hoge impact oefeningen (springen, hardlopen)","Zware axiale belasting op aangedane gewrichten"],prefer:["Zwemmen of Aqua Fitness","Stationary Bike","Krachttraining in gesloten keten met beperkte range"],note:"Kies voor gewrichtsvriendelijke, laag-impact vormen van training."},
+  osteoporose:{label:"Osteoporose",avoid:["Diepe voorwaartse flexie van de rug (bijv. Sit-Up)","Rotatie onder zware belasting","Hoog-impact sprongoefeningen zonder opbouw"],prefer:["Gewichtdragende oefeningen met geleidelijke opbouw","Balans- en valpreventietraining","Houdingsgerichte rugversterkende oefeningen"],note:"Focus op botopbouwende, houding-ondersteunende training; vermijd plotselinge zware flexie/rotatie."},
+  zwangerschap:{label:"Zwanger (huidig)",avoid:["Liggen op de rug na het eerste trimester","Zware maximale krachttraining","Contactsporten of hoog valrisico","Hoge impact / sprongoefeningen"],prefer:["Bekkenbodem- en core-stabilisatie","Wandelen, zwemmen, Stationary Bike","Lichte tot gematigde krachttraining met begeleiding"],note:"Altijd afstemmen met verloskundige/arts; intensiteit en oefenkeuze aanpassen per trimester."},
+  bekkenklachten_postpartum:{label:"Bekkenklachten na de bevalling",avoid:["Lunges en andere eenzijdig belaste beenoefeningen","Asymmetrische rotatie-oefeningen onder belasting","Hardlopen of springen zonder opbouw","Lang eenzijdig staan of grote pasbewegingen"],prefer:["Symmetrische, dubbelzijdige beenoefeningen (bijv. Leg Press, Bodyweight Squat)","Bekkenbodem- en diepe-coreoefeningen met uitademen bij inspanning","Rustige, symmetrische cardio zoals Stationary Bike of wandelen"],note:"Klachten horen na circa 6 weken met oefeningen te verminderen; nemen ze niet af, verwijs door naar een (bekken)fysiotherapeut. Gebaseerd op de KNGF-richtlijn Zwangerschapsgerelateerde Bekkenpijn."},
+  diastase_postpartum:{label:"Diastase (buikspieren) na de bevalling",avoid:["Sit-Ups, Crunches en andere buikspieroefeningen met volledige flexie","Plank en houdingen die de buikwand naar buiten laten bollen","Zware Overhead- of tiloefeningen","Rotatie-oefeningen met weerstand op de buikwand"],prefer:["Diepe buik- en bekkenbodemactivatie met uitademen bij inspanning (bijv. Dead Bug, bekkenkantelingen)","Laag-impact cardio zoals wandelen, fietsen of zwemmen","Geleidelijke, symmetrische krachtopbouw zonder buikwand-uitstulping"],note:"Bouw minimaal de eerste 12 weken laag-impact op; hardlopen of springen pas na vrijgave door een (bekkenbodem)fysiotherapeut. Gebaseerd op ACOG Committee Opinion 804 en de return-to-running richtlijnen van Goom, Donnelly & Brockwell (2019)."},
+  enkel:{label:"Enkel- / instabiliteit",avoid:["Hardlopen op ongelijke ondergrond","Sprongoefeningen zonder opbouw","Lunges op instabiele ondergrond"],prefer:["Balanstraining","Stationary Bike","Calf Raise gecontroleerd opbouwen"],note:"Bouw stabiliteit en propriocepsis op voordat belasting en impact toenemen."},
+  pols:{label:"Pols- / elleboogklachten",avoid:["Push-Up en Bench Press met volle polsextensie","Zware directe polsbelasting (bijv. Front Squat)"],prefer:["Kabel- of machineoefeningen met neutrale grip","Aangepaste grips die de pols ontlasten"],note:"Vermijd volledige polsextensie onder zware belasting; kies grip-vriendelijke varianten."},
+  hartpatient:{label:"Hartpatiënt (na infarct/hartoperatie)",avoid:["Trainen zonder vrijgave van cardioloog of hartrevalidatieteam","Plotselinge maximale inspanning","Zware isometrische houdingen of persen (Valsalva-manoeuvre)","Doortrainen bij pijn op de borst, ademnood of duizeligheid"],prefer:["Krachttraining op 2-3 niet-opeenvolgende dagen per week, laag startvolume","Belasting sturen op de Borg-schaal (11-14: 'vrij licht tot vrij zwaar')","Starten met 1 set, geleidelijk opbouwen naar 2-3 sets van 10-15 herhalingen","Rustige, gedoseerde duurtraining zoals wandelen of fietsen als basis"],note:"Gebaseerd op de AHA/AACVPR-richtlijn Cardiac Rehabilitation (2024): start altijd na medische vrijgave, met begeleide en geleidelijke opbouw op basis van ervaren inspanning in plaats van vaste percentages.",protocol:["Voorwaarde: schriftelijke vrijgave van cardioloog of hartrevalidatieteam voordat met trainen bij MORE2BFIT wordt gestart.","Fase 1: rustige duurtraining (wandelen, fietsen) en krachttraining met 1 set, laag gewicht, RPE 11-13 op de Borg-schaal.","Fase 2: geleidelijk naar 2-3 sets van 10-15 herhalingen, nog steeds submaximaal en met normale ademhaling (geen persen).","Doorlopend: bij pijn op de borst, ongebruikelijke kortademigheid, duizeligheid of hartkloppingen direct stoppen en medische hulp zoeken."]},
+  diabetes2:{label:"Diabetes type 2",avoid:["Sporten bij een zeer hoge bloedsuiker (>16,7 mmol/l) in combinatie met ketonen","Intensieve training vlak vóór het slapengaan bij insulinegebruik (verhoogd risico op nachtelijke hypo)","Blootsvoets trainen of slecht passend schoeisel"],prefer:["Combinatie van duur- en krachttraining, krachttraining op 2-3 niet-opeenvolgende dagen per week","Bloedsuiker checken vóór het sporten bij insulinegebruik of medicatie die een hypo kan geven","Koolhydraten en water binnen handbereik tijdens de training"],note:"Gebaseerd op de gezamenlijke ACSM/ADA-richtlijn: zowel duur- als krachttraining verbeteren de bloedsuikerregulatie. Bij insulinegebruik is alertheid op (ook vertraagde) hypoglykemie na het sporten belangrijk.",protocol:["Vóór het sporten: bloedsuiker checken bij insulinegebruik of medicatie die een hypo kan veroorzaken; koolhydraten achter de hand houden.","Tijdens het sporten: alert zijn op klassieke hypo-signalen (trillen, zweten, duizeligheid, verwardheid) en direct actie ondernemen indien nodig.","Na het sporten: bewust zijn van het risico op vertraagde hypoglykemie, ook uren na de training.","Voeten dagelijks controleren en goed passend schoeisel dragen, zeker bij (beginnende) neuropathie."]},
+  betablokkers:{label:"Bètablokkers",avoid:["Trainingsintensiteit sturen op basis van hartslagzones of -tabellen","Verrast raken door een lager dan verwacht maximale hartslag tijdens inspanning"],prefer:["Inspanning sturen op de Borg-schaal (RPE) in plaats van hartslag","Ademhaling en spraakvermogen als extra maatstaf gebruiken","Rustig opbouwen en bij duizeligheid direct stoppen"],note:"Bètablokkers dempen de hartslagreactie op inspanning, waardoor hartslagzones onbetrouwbaar worden als maatstaf. RPE (ervaren inspanning) blijft wel betrouwbaar en is de aanbevolen manier om de intensiteit te sturen. Gebaseerd op ACSM-richtlijnen en onderzoek naar RPE-gestuurde training bij bètablokker-gebruik.",protocol:["Gebruik de Borg-schaal (RPE) in plaats van hartslagzones om de intensiteit te bepalen.","Bouw nieuwe oefeningen en intensiteit rustig op; het 'normale' gevoel bij een bepaalde hartslag kan anders zijn dan verwacht.","Let op duizeligheid bij snel opstaan (kan duiden op een te lage bloeddruk) en sta bij twijfel rustig op.","Bij nieuwe klachten (pijn op de borst, ongewone kortademigheid) altijd eerst overleggen met de arts."]},
+  antidepressiva:{label:"Antidepressiva",avoid:["Snel opstaan uit een liggende of diep gebogen positie","Trainen bij duizeligheid of licht gevoel in het hoofd zonder dit te melden"],prefer:["Rustig opbouwen, vooral bij een net gestarte of gewijzigde dosering","Bewust en langzaam overeind komen na liggende oefeningen","Voldoende water drinken tijdens de training"],note:"Sommige antidepressiva (met name tricyclische antidepressiva, en in mindere mate SNRI's) kunnen een lagere bloeddruk bij het opstaan (orthostatische hypotensie) of duizeligheid veroorzaken, zeker kort na de start of een dosiswijziging. Dit risico is doorgaans het grootst in de eerste weken van gebruik.",protocol:["Extra alertheid in de eerste weken na starten of wijzigen van de dosering.","Na liggende of diep voorovergebogen oefeningen rustig en gedoseerd overeind komen, niet abrupt.","Bij duizeligheid, licht gevoel in het hoofd of wazig zien: direct stoppen en gaan zitten.","Bij aanhoudende duizeligheidsklachten doorverwijzen naar de huisarts of psychiater."]},
+  bloedverdunners:{label:"Bloedverdunners",avoid:["Contactsporten of activiteiten met een hoog valrisico","Oefeningen met een aanzienlijk risico op stoten of vallen zonder opbouw","Doortrainen bij ongewone blauwe plekken, bloedingen of zwelling"],prefer:["Machine-gestuurde oefeningen met een stabiele, voorspelbare beweging","Balanstraining rustig en onder toezicht opbouwen","Alertheid op signalen van een trombose (zwelling, pijn/drukgevoeligheid in kuit of arm)"],note:"Bij bloedverdunners kan zelfs een kleine blessure tot meer bloeding of blauwe plekken leiden dan gebruikelijk. Activiteiten met een verhoogd val- of stootrisico verdienen extra voorzichtigheid; dat betekent niet dat trainen vermeden moet worden, wel dat de vorm bewust gekozen wordt.",protocol:["Kies bij voorkeur machine-gestuurde of goed gecontroleerde oefeningen boven activiteiten met een hoog val- of stootrisico.","Bouw balans- en stabiliteitsoefeningen rustig op, met begeleiding.","Let op ongewone blauwe plekken, aanhoudend bloeden bij een schaafwond, of zwelling/pijn in een kuit of arm — dit kan wijzen op een bloeding of trombose.","Bij twijfel of nieuwe klachten altijd contact opnemen met de behandelend arts."]},
+  statines:{label:"Statines (cholesterolverlagers)",avoid:["Ongewone, aanhoudende spierpijn of -zwakte negeren als 'gewone' spierpijn","Snel en fors opbouwen in intensiteit bij nieuw gestarte statinetherapie"],prefer:["Rustige, geleidelijke opbouw van trainingsintensiteit","Onderscheid maken tussen normale traininspijn (DOMS) en ongebruikelijke, aanhoudende spierpijn of -zwakte","Voldoende hersteltijd tussen zware krachttrainingen"],note:"Statines kunnen bij een deel van de gebruikers spierklachten veroorzaken, variërend van lichte spierpijn tot (zeldzaam) ernstigere spierschade. Dit onderscheidt zich van normale traininspijn doordat het vaak aanhoudender is, niet duidelijk aan één training te koppelen is, of gepaard gaat met spierzwakte.",protocol:["Bouw de trainingsintensiteit geleidelijk op, zeker bij recent gestarte statinetherapie.","Onderscheid normale spierpijn (DOMS, verdwijnt binnen enkele dagen, duidelijk gekoppeld aan de training) van ongebruikelijke spierpijn of -zwakte die aanhoudt of verergert.","Bij aanhoudende of ongebruikelijke spierklachten: trainingsbelasting verlagen en doorverwijzen naar de huisarts.","Geef door aan de trainer als de statine-dosering wijzigt, dit kan invloed hebben op de belastbaarheid."]}
+};
+
+const MUSCLE_LIBRARY={
+  borst:{label:"Borst",icon:"ph-heart",exercises:[
+    {name:"Chest Press (Machine)",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Incline Chest Press (Machine)",equipment:"machine",level:"beginner",conflicts:["frozen_shoulder"]},
+    {name:"Flat Dumbbell Bench Press",equipment:"free",level:"beginner",conflicts:["schouder","pols"]},
+    {name:"Push-Up (op knieën indien nodig)",equipment:"bodyweight",level:"beginner",conflicts:["pols","schouder"]},
+    {name:"Pec Deck",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Cable Fly",equipment:"machine",level:"gemiddeld",conflicts:["schouder"]},
+    {name:"Barbell Bench Press",equipment:"free",level:"gemiddeld",conflicts:["schouder","pols"]},
+    {name:"Incline Barbell Bench Press",equipment:"free",level:"gemiddeld",conflicts:["schouder","pols","frozen_shoulder"]},
+    {name:"Dumbbell Fly",equipment:"free",level:"gemiddeld",conflicts:["schouder"]},
+    {name:"Chest Dip (geassisteerd indien nodig)",equipment:"bodyweight",level:"gemiddeld",conflicts:["schouder","pols","bursitis","frozen_shoulder"]},
+    {name:"Dumbbell Pullover",equipment:"free",level:"gevorderd",conflicts:["schouder","bursitis","frozen_shoulder"]},
+    {name:"Weighted Dip",equipment:"free",level:"gevorderd",conflicts:["schouder","pols","bursitis","frozen_shoulder"]},
+    {name:"Spoto Press",equipment:"free",level:"gevorderd",conflicts:["schouder","pols"]}
+  ]},
+  rug:{label:"Rug",icon:"ph-arrows-in",exercises:[
+    {name:"Lat Pulldown",equipment:"machine",level:"beginner",conflicts:["schouder","bursitis","frozen_shoulder"]},
+    {name:"Assisted Pull-Up",equipment:"machine",level:"beginner",conflicts:["schouder","bursitis","frozen_shoulder","tennisarm"]},
+    {name:"Straight-Arm Pulldown (kabel)",equipment:"machine",level:"beginner",conflicts:["schouder"]},
+    {name:"Seated Cable Row",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Chest-Supported Row (Machine)",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Back Extension (gecontroleerd)",equipment:"machine",level:"beginner",conflicts:["rug","osteoporose"]},
+    {name:"Single-Arm Dumbbell Row",equipment:"free",level:"gemiddeld",conflicts:[]},
+    {name:"Pull-Up",equipment:"bodyweight",level:"gemiddeld",conflicts:["schouder","bursitis","frozen_shoulder","tennisarm"]},
+    {name:"Chin-Up",equipment:"bodyweight",level:"gemiddeld",conflicts:["schouder","pols","bursitis","frozen_shoulder","tennisarm"]},
+    {name:"Bent-Over Barbell Row",equipment:"free",level:"gemiddeld",conflicts:["rug","schouder","tennisarm"]},
+    {name:"T-Bar Row",equipment:"free",level:"gemiddeld",conflicts:["rug","tennisarm"]},
+    {name:"Romanian Deadlift (Barbell)",equipment:"free",level:"gemiddeld",conflicts:["rug"]},
+    {name:"Face Pull",equipment:"machine",level:"gemiddeld",conflicts:[]},
+    {name:"Weighted Pull-Up",equipment:"free",level:"gevorderd",conflicts:["schouder","pols","bursitis","frozen_shoulder","tennisarm"]},
+    {name:"Pendlay Row",equipment:"free",level:"gevorderd",conflicts:["rug","schouder","tennisarm"]},
+    {name:"Barbell Deadlift",equipment:"free",level:"gevorderd",conflicts:["rug","knie","tennisarm"]}
+  ]},
+  benen:{label:"Benen",icon:"ph-person-simple-walk",exercises:[
+    {name:"Leg Press",equipment:"machine",level:"beginner",conflicts:["knie_acuut"]},
+    {name:"Leg Extension (Machine)",equipment:"machine",level:"beginner",conflicts:["knie_acuut"]},
+    {name:"Leg Curl (Machine)",equipment:"machine",level:"beginner",conflicts:["knie_acuut"]},
+    {name:"Hack Squat (Machine)",equipment:"machine",level:"beginner",conflicts:["knie_acuut","nieuwe_heup"]},
+    {name:"Goblet Squat",equipment:"free",level:"beginner",conflicts:["knie","knie_acuut","nieuwe_heup"]},
+    {name:"Standing Calf Raise (Machine)",equipment:"machine",level:"beginner",conflicts:["knie_acuut"]},
+    {name:"Bodyweight Squat",equipment:"bodyweight",level:"beginner",conflicts:["knie","rug","knie_acuut","nieuwe_heup"]},
+    {name:"Wall Sit (isometrisch, hoek aanpasbaar)",equipment:"bodyweight",level:"beginner",conflicts:[]},
+    {name:"Sta-balans op Bosu-bal",equipment:"bodyweight",level:"beginner",conflicts:["bloedverdunners"]},
+    {name:"Back Squat (Barbell)",equipment:"free",level:"gemiddeld",conflicts:["knie","rug","knie_acuut","nieuwe_heup"]},
+    {name:"Front Squat (Barbell)",equipment:"free",level:"gemiddeld",conflicts:["knie","rug","knie_acuut","nieuwe_heup"]},
+    {name:"Walking Lunge",equipment:"bodyweight",level:"gemiddeld",conflicts:["knie","enkel","bekkenklachten_postpartum","knie_acuut","nieuwe_heup"]},
+    {name:"Romanian Deadlift (Dumbbell)",equipment:"free",level:"gemiddeld",conflicts:["rug","knie_acuut","nieuwe_heup"]},
+    {name:"Nordic Hamstring Curl",equipment:"bodyweight",level:"gevorderd",conflicts:["knie","knie_acuut"]},
+    {name:"Pistol Squat",equipment:"bodyweight",level:"gevorderd",conflicts:["knie","enkel","knie_acuut","nieuwe_heup","bloedverdunners"]}
+  ]},
+  bilspieren:{label:"Bilspieren",icon:"ph-person-simple-run",exercises:[
+    {name:"Cable Glute Kickback",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Hip Abduction (Machine)",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Glute Bridge",equipment:"bodyweight",level:"beginner",conflicts:[]},
+    {name:"Bodyweight Hip Thrust",equipment:"bodyweight",level:"beginner",conflicts:[]},
+    {name:"Step-Up (lage opstap)",equipment:"bodyweight",level:"beginner",conflicts:["knie","bekkenklachten_postpartum","knie_acuut","nieuwe_heup"]},
+    {name:"Barbell Hip Thrust",equipment:"free",level:"gemiddeld",conflicts:["rug"]},
+    {name:"Bulgarian Split Squat",equipment:"free",level:"gemiddeld",conflicts:["knie","enkel","bekkenklachten_postpartum","knie_acuut","nieuwe_heup"]},
+    {name:"Reverse Lunge",equipment:"bodyweight",level:"gemiddeld",conflicts:["knie","enkel","bekkenklachten_postpartum","knie_acuut","nieuwe_heup"]},
+    {name:"Cable Pull-Through",equipment:"machine",level:"gemiddeld",conflicts:["rug","nieuwe_heup"]},
+    {name:"Single-Leg Hip Thrust",equipment:"free",level:"gevorderd",conflicts:["rug","knie","knie_acuut"]},
+    {name:"Deficit Reverse Lunge",equipment:"free",level:"gevorderd",conflicts:["knie","enkel","bekkenklachten_postpartum","knie_acuut","nieuwe_heup"]}
+  ]},
+  buik:{label:"Buik / Core",icon:"ph-circle-dashed",exercises:[
+    {name:"Plank",equipment:"bodyweight",level:"beginner",conflicts:["diastase_postpartum"]},
+    {name:"Cable Crunch",equipment:"machine",level:"beginner",conflicts:["rug","osteoporose","zwangerschap","diastase_postpartum"]},
+    {name:"Dead Bug",equipment:"bodyweight",level:"beginner",conflicts:[]},
+    {name:"Mat Crunch",equipment:"bodyweight",level:"beginner",conflicts:["rug","osteoporose","zwangerschap","diastase_postpartum"]},
+    {name:"Bird Dog",equipment:"bodyweight",level:"beginner",conflicts:[]},
+    {name:"Reverse Crunch",equipment:"bodyweight",level:"gemiddeld",conflicts:["rug","diastase_postpartum"]},
+    {name:"Hanging Knee Raise",equipment:"bodyweight",level:"gemiddeld",conflicts:["schouder","rug"]},
+    {name:"Ab Wheel Rollout",equipment:"free",level:"gemiddeld",conflicts:["rug","diastase_postpartum","bekkenklachten_postpartum"]},
+    {name:"Pallof Press",equipment:"machine",level:"gemiddeld",conflicts:[]},
+    {name:"Cable Woodchop (licht)",equipment:"machine",level:"gemiddeld",conflicts:["rug","diastase_postpartum","bekkenklachten_postpartum"]},
+    {name:"Side Plank",equipment:"bodyweight",level:"gemiddeld",conflicts:["diastase_postpartum"]},
+    {name:"Hanging Leg Raise",equipment:"bodyweight",level:"gevorderd",conflicts:["schouder","rug"]},
+    {name:"Dragon Flag",equipment:"bodyweight",level:"gevorderd",conflicts:["rug","diastase_postpartum"]},
+    {name:"Toes to Bar",equipment:"bodyweight",level:"gevorderd",conflicts:["schouder","rug","diastase_postpartum"]}
+  ]},
+  schouders:{label:"Schouders",icon:"ph-arrows-out",exercises:[
+    {name:"Shoulder Press (Machine)",equipment:"machine",level:"beginner",conflicts:["schouder","bursitis","frozen_shoulder"]},
+    {name:"Lateral Raise (Machine)",equipment:"machine",level:"beginner",conflicts:["schouder","frozen_shoulder"]},
+    {name:"Reverse Pec Deck",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Scapular Retraction",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Front Raise (Dumbbell)",equipment:"free",level:"beginner",conflicts:["schouder","bursitis","frozen_shoulder"]},
+    {name:"Dumbbell Shoulder Press",equipment:"free",level:"gemiddeld",conflicts:["schouder","nek","bursitis","frozen_shoulder"]},
+    {name:"Overhead Press (Barbell)",equipment:"free",level:"gemiddeld",conflicts:["schouder","nek","diastase_postpartum","bursitis","frozen_shoulder"]},
+    {name:"Arnold Press (Dumbbell)",equipment:"free",level:"gemiddeld",conflicts:["schouder","nek","bursitis","frozen_shoulder"]},
+    {name:"Dumbbell Lateral Raise",equipment:"free",level:"gemiddeld",conflicts:["schouder","frozen_shoulder"]},
+    {name:"Bent-Over Reverse Fly",equipment:"free",level:"gemiddeld",conflicts:["schouder","rug"]},
+    {name:"Face Pull",equipment:"machine",level:"gemiddeld",conflicts:[]},
+    {name:"Push Press",equipment:"free",level:"gevorderd",conflicts:["schouder","nek","knie","bursitis","frozen_shoulder"]},
+    {name:"Strict Military Press",equipment:"free",level:"gevorderd",conflicts:["schouder","nek","bursitis","frozen_shoulder"]}
+  ]},
+  armen:{label:"Armen",icon:"ph-hand-fist",exercises:[
+    {name:"Cable Bicep Curl",equipment:"machine",level:"beginner",conflicts:["pols","tennisarm"]},
+    {name:"Machine Preacher Curl",equipment:"machine",level:"beginner",conflicts:["pols","tennisarm"]},
+    {name:"Triceps Pushdown (rope)",equipment:"machine",level:"beginner",conflicts:[]},
+    {name:"Machine Overhead Extension",equipment:"machine",level:"beginner",conflicts:["schouder","pols","bursitis","frozen_shoulder"]},
+    {name:"Dumbbell Curl (licht)",equipment:"free",level:"beginner",conflicts:["pols","tennisarm"]},
+    {name:"Hammer Curl (neutrale grip)",equipment:"free",level:"beginner",conflicts:[]},
+    {name:"Bench Dip (ondiep)",equipment:"bodyweight",level:"beginner",conflicts:["schouder","pols"]},
+    {name:"Barbell Curl",equipment:"free",level:"gemiddeld",conflicts:["pols","tennisarm"]},
+    {name:"EZ-Bar Curl",equipment:"free",level:"gemiddeld",conflicts:["pols","tennisarm"]},
+    {name:"Preacher Curl (EZ-Bar)",equipment:"free",level:"gemiddeld",conflicts:["pols","tennisarm"]},
+    {name:"Skull Crusher (EZ-Bar)",equipment:"free",level:"gemiddeld",conflicts:["schouder","pols","tennisarm"]},
+    {name:"Close-Grip Bench Press",equipment:"free",level:"gemiddeld",conflicts:["schouder","pols","tennisarm"]},
+    {name:"Overhead Triceps Extension (kabel)",equipment:"machine",level:"gemiddeld",conflicts:["schouder","pols","bursitis","frozen_shoulder"]},
+    {name:"Concentration Curl",equipment:"free",level:"gevorderd",conflicts:["pols","tennisarm"]},
+    {name:"Weighted Dip",equipment:"free",level:"gevorderd",conflicts:["schouder","pols","bursitis","frozen_shoulder"]},
+    {name:"Spider Curl",equipment:"free",level:"gevorderd",conflicts:["pols","tennisarm"]}
+  ]},
+  conditie:{label:"Cardio / conditie",icon:"ph-heartbeat",exercises:[
+    {name:"Stationary Bike",equipment:"machine",level:"gemiddeld",conflicts:[]},
+    {name:"Rowing Machine (gematigd tempo)",equipment:"machine",level:"gemiddeld",conflicts:["rug"]},
+    {name:"Treadmill Walk",equipment:"machine",level:"gemiddeld",conflicts:[]},
+    {name:"Cross Trainer / Elliptical",equipment:"machine",level:"gemiddeld",conflicts:["knie"]},
+    {name:"Stair Climber",equipment:"machine",level:"gemiddeld",conflicts:["knie"]},
+    {name:"Ski Erg",equipment:"machine",level:"gemiddeld",conflicts:["schouder"]}
+  ]}
+};
+
+function buildScales(){
+ const scale=document.getElementById("confidenceScale");
+ for(let i=1;i<=10;i++){
+   const b=document.createElement("button");b.textContent=i;
+   if(i===state.confidence)b.classList.add("active");
+   b.onclick=()=>{state.confidence=i;[...scale.children].forEach(x=>x.classList.toggle("active",x===b));updateAll()};
+   scale.appendChild(b);
+ }
+}
+
+function setupChoices(){
+ document.querySelectorAll("[data-group]").forEach(group=>{
+   group.querySelectorAll(".choice").forEach(btn=>{
+     btn.onclick=()=>{
+       group.querySelectorAll(".choice").forEach(x=>x.classList.remove("active"));
+       btn.classList.add("active");
+       state[group.dataset.group]=group.dataset.group==="frequency"?Number(btn.dataset.value):btn.dataset.value;
+       updateAll();
+     };
+   });
+ });
+}
+function setupJump(){
+ document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{
+   document.getElementById(b.dataset.jump).scrollIntoView({behavior:"smooth"});
+   document.querySelectorAll("[data-jump]").forEach(x=>x.classList.toggle("active",x===b));
+ });
+}
+function getActivityData(){
+ let totalMinutes=0, weighted=0, strengthSessions=0;
+ document.querySelectorAll(".activity-row[data-activity]").forEach(row=>{
+   const freq=Number(row.querySelector(".act-frequency").value||0);
+   const duration=Number(row.querySelector(".act-duration").value||0);
+   const intensity=Number(row.querySelector(".act-intensity").value||1);
+   const minutes=freq*duration;
+   const weightedPart=minutes*intensity;
+   totalMinutes+=minutes;
+   weighted+=weightedPart;
+   if(row.dataset.activity==="sport") strengthSessions=freq;
+   const points=Math.min(30,Math.round(weightedPart/20));
+   row.querySelector(".activity-contribution strong").textContent=points;
+ });
+ return {totalMinutes,weighted:Math.round(weighted),strengthSessions};
+}
+function currentMinutes(){
+ return getActivityData().totalMinutes;
+}
+function recommendedMinutes(){
+ const f=state.frequency===0?2:state.frequency;
+ return f*60;
+}
+function cappedGain(now,next){
+ if(now<=0)return next>0?100:0;
+ const raw=((next-now)/now)*100;
+ return Math.min(100,Math.max(0,Math.round(raw)));
+}
+function profile(score){
+ if(score<30)return["Starter","De huidige beweegbasis is beperkt. Kleine vaste stappen en veel succeservaring zijn nu het belangrijkst."];
+ if(score<55)return["Opbouwer","Er is al enige beweging, maar meer structuur en krachttraining kunnen veel extra winst opleveren."];
+ if(score<78)return["Actief","De basis is goed. Een gerichter patroon helpt om doelen sneller en consistenter te behalen."];
+ return["Sportief","Het beweegpatroon is sterk. De focus verschuift naar kwaliteit, progressie en herstel."];
+}
+function recommendation(){
+ const f=state.frequency===0?2:state.frequency;
+ if(state.support==="personal") return {name:f===1?"PT 30":"PT 60",price:f===1?"€99,00 per maand":"€129,00 per maand",text:"Een vaste persoonlijke afspraak geeft structuur, techniekcoaching en directe bijsturing."};
+ if(state.support==="regular") return {name:"PT 30",price:"€99,00 per maand",text:"Vaste, wekelijkse evaluatiemomenten met bijsturing geven houvast zonder dat elke training persoonlijk begeleid hoeft te worden."};
+ if(state.support==="social") return {name:"Duo Personal Training",price:"€179,00 per maand",text:"Samen trainen combineert persoonlijke begeleiding met sociale motivatie."};
+ if(f===1) return {name:"Fitness 1× per week",price:"€34,95 per maand",text:"Een vaste wekelijkse training vormt een haalbare basis die past bij de beschikbare tijd."};
+ if(f===2) return {name:"Fitness 2× per week",price:"€39,95 per maand",text:"Twee vaste trainingen geven een sterke balans tussen resultaat, herstel en volhouden."};
+ return {name:"Onbeperkt fitness",price:"€44,95 per maand",text:"Meerdere trainingsmomenten per week bieden ruimte voor meer volume, variatie en flexibiliteit."};
+}
+
+
+const reasonLabels={
+ weight:"Afvallen",
+ condition:"Conditie verbeteren",
+ strength:"Sterker worden",
+ muscle:"Spiermassa opbouwen",
+ energy:"Meer energie",
+ health:"Fitter ouder worden",
+ painfree:"Minder klachten",
+ social:"Sociale contacten"
+};
+const reasonDescriptions={
+ weight:"Focus op energieverbruik, haalbare gewoontes en behoud van spiermassa.",
+ condition:"Focus op geleidelijke opbouw van duurvermogen en herstel.",
+ strength:"Focus op progressieve krachttraining en techniek.",
+ muscle:"Focus op voldoende trainingsprikkel, herstel en consistentie.",
+ energy:"Focus op regelmaat, belastbaarheid en een haalbare trainingsfrequentie.",
+ health:"Focus op een brede combinatie van kracht, conditie en dagelijkse activiteit.",
+ painfree:"Focus op gecontroleerd opbouwen en passend bewegen binnen de belastbaarheid.",
+ social:"Focus op een vaste, gezellige trainingsroutine — samen trainen of in groepsverband."
+};
+function reasonWeight(index,total){
+ const sets={
+   1:[100],
+   2:[60,40],
+   3:[50,30,20]
+ };
+ return sets[total]?.[index]||0;
+}
+function updateReasonChoices(){
+ document.querySelectorAll(".reason-choice").forEach(btn=>{
+   const index=state.reasons.indexOf(btn.dataset.reason);
+   btn.classList.toggle("selected",index>-1);
+   const badge=btn.querySelector(".reason-order");
+   if(badge)badge.textContent=index>-1?index+1:"";
+ });
+ const message=document.getElementById("reasonLimitMessage");
+ if(message)message.textContent=state.reasons.length===3?"Je hebt drie redenen gekozen. Klik op een keuze om deze te verwijderen.":"";
+}
+function getPrimaryGoal(){
+ return state.reasons[0]||state.goal||"health";
+}
+
+const reasonAdvice={
+ weight:[
+   ["ph-scales","Gewicht stap voor stap verlagen","Combinatie van krachttraining, meer dagelijkse activiteit en haalbare voedingskeuzes."],
+   ["ph-barbell","Spiermassa behouden","Krachttraining helpt om tijdens het afvallen zo veel mogelijk spiermassa te behouden."],
+   ["ph-footprints","Dagelijks actiever worden","Meer wandelen en bewegen buiten de training vergroot het totale energieverbruik."]
+ ],
+ condition:[
+   ["ph-heartbeat","Conditie geleidelijk opbouwen","Regelmatige inspanning op een passend niveau, zonder te snel op te bouwen."],
+   ["ph-person-simple-walk","Langer bewegen volhouden","Wandelen, fietsen of circuitvormen helpen om inspanningen beter vol te houden."],
+   ["ph-timer","Herstel verbeteren","Voldoende rust tussen inspanningen en een consistente trainingsfrequentie."]
+ ],
+ strength:[
+   ["ph-barbell","Gericht sterker worden","Werken met progressieve krachttraining en oefeningen die passen bij het huidige niveau."],
+   ["ph-chart-line-up","Vooruitgang bijhouden","Belasting en herhalingen stapsgewijs verhogen en periodiek evalueren."],
+   ["ph-shield-check","Techniek en belastbaarheid","Eerst goed leren bewegen en daarna gecontroleerd verzwaren."]
+ ],
+ muscle:[
+   ["ph-person-simple-run","Spiermassa opbouwen","Voldoende trainingsprikkel, herstel en regelmaat in de week."],
+   ["ph-barbell","Progressieve krachttraining","Belasting en trainingsvolume geleidelijk verhogen."],
+   ["ph-fork-knife","Herstel ondersteunen","Voldoende eiwitten, slaap en rustmomenten."]
+ ],
+ energy:[
+   ["ph-lightning","Meer energie ervaren","Een haalbare trainingsfrequentie combineren met voldoende herstel."],
+   ["ph-calendar-check","Vaste beweegmomenten","Beweging inplannen op momenten die goed passen in het dagelijks leven."],
+   ["ph-bed","Belasting en herstel in balans","Niet alleen meer doen, maar ook voldoende herstellen."]
+ ],
+ health:[
+   ["ph-heart","Brede gezondheid verbeteren","Kracht, conditie en dagelijkse activiteit in balans ontwikkelen."],
+   ["ph-shield-check","Zelfstandig en belastbaar blijven","Werken aan spierkracht, mobiliteit en vertrouwen in bewegen."],
+   ["ph-footprints","Meer dagelijkse beweging","Ook buiten de sportschool regelmatig actief blijven."]
+ ],
+ painfree:[
+   ["ph-person-simple-walk","Comfortabeler bewegen","Oefeningen kiezen die passen bij de huidige belastbaarheid."],
+   ["ph-shield-check","Vertrouwen opbouwen","Stapsgewijs bewegen zonder onnodige angst of overbelasting."],
+   ["ph-arrows-clockwise","Regelmatig evalueren","Klachten en belastbaarheid blijven volgen en het plan waar nodig aanpassen."]
+ ]
+};
+
+
+
+function renderAdvicePriorities(){
+ const box=document.getElementById("advicePriorities");
+ if(!box)return;
+ const total=state.reasons.length;
+ if(!total){
+   box.innerHTML="";
+   return;
+ }
+ box.innerHTML=state.reasons.map((reason,index)=>`
+   <div class="advice-priority">
+     <span class="advice-priority-rank">${index+1}</span>
+     <div>
+       <strong>${reasonLabels[reason]}</strong>
+       <small>${reasonDescriptions[reason]}</small>
+     </div>
+     <span class="advice-priority-weight">${reasonWeight(index,total)}%</span>
+   </div>
+ `).join("");
+}
+
+function calcAge(birthdateStr){
+ if(!birthdateStr)return null;
+ const birth=new Date(birthdateStr);
+ if(isNaN(birth.getTime()))return null;
+ const today=new Date();
+ let age=today.getFullYear()-birth.getFullYear();
+ const m=today.getMonth()-birth.getMonth();
+ if(m<0 || (m===0 && today.getDate()<birth.getDate()))age--;
+ return age;
+}
+
+function clamp(value,min,max){return Math.min(max,Math.max(min,value))}
+function scoreProfile(score){
+ if(score<30)return "Startfase";
+ if(score<50)return "In opbouw";
+ if(score<70)return "Goede basis";
+ if(score<85)return "Sterk profiel";
+ return "Zeer sterk profiel";
+}
+function getActivityBreakdown(){
+ const result={walk:0,bike:0,sport:0,work:0,total:0,weighted:0,sessions:0};
+ document.querySelectorAll(".activity-row[data-activity]").forEach(row=>{
+   const key=row.dataset.activity;
+   const freq=Number(row.querySelector(".act-frequency").value||0);
+   const duration=Number(row.querySelector(".act-duration").value||0);
+   const intensity=Number(row.querySelector(".act-intensity").value||1);
+   const minutes=freq*duration;
+   result[key]=minutes;
+   result.total+=minutes;
+   result.weighted+=minutes*intensity;
+   result.sessions+=freq;
+ });
+ result.weighted=Math.round(result.weighted);
+ return result;
+}
+function calculateHealthDomains(planned=false){
+ const a=getActivityBreakdown();
+ const f=state.frequency===0?1:state.frequency;
+ const sitting=Number(document.getElementById("sittingHours")?.value||8);
+ const load=Number(document.getElementById("weekLoad")?.value||0);
+ const currentSportFreq=Number(document.querySelector('[data-activity="sport"] .act-frequency')?.value||0);
+ const conditionRating=Number(document.getElementById("conditionRating")?.value||5);
+ const energyRating=Number(document.getElementById("energyRating")?.value||5);
+
+ let movement=clamp(Math.round(a.weighted/24),0,15);
+ let strength=clamp(currentSportFreq*5,0,15);
+ let condition=clamp(Math.round(conditionRating*1.5),0,15);
+ let daily=clamp(Math.round((a.walk+a.bike+a.work)/18),0,15);
+ let energy=clamp(Math.round(energyRating*1.5),0,15);
+ let sittingScore=clamp(Math.round(10-(Math.max(0,sitting-6)*1.5)),0,10);
+
+
+ if(planned){
+   movement=clamp(movement+f*2,0,15);
+   strength=clamp(Math.max(strength,f*5),0,15);
+
+   // Conditie stijgt alleen beperkt bij algemeen fitnessen en sterker wanneer conditie het gekozen doel is.
+   const conditionBoost=(getPrimaryGoal()==="condition"?Math.min(5,f*2.2):Math.min(3,f*1.2));
+   condition=clamp(Math.round(condition+conditionBoost),0,15);
+
+   // Dagelijkse activiteit verandert niet automatisch door een fitnessabonnement.
+   daily=clamp(daily+(f>=3?1:0),0,15);
+
+   // Energie en fitheid kunnen geleidelijk verbeteren, maar blijven gekoppeld aan de huidige beleving.
+   const supportBoost=state.support==="personal"?2:state.support==="regular"?1:0;
+   energy=clamp(energy+Math.min(3,Math.ceil(f/2)+supportBoost),0,15);
+
+   sittingScore=clamp(sittingScore+(f>=3?1:0),0,10);
+
+ }
+ return {movement,strength,condition,daily,energy,sitting:sittingScore};
+}
+function setDomain(domain,current,future){
+ const max={movement:15,strength:15,condition:15,daily:15,energy:15,sitting:10}[domain];
+ document.getElementById(domain+"CurrentBar").style.width=(current/max*100)+"%";
+ document.getElementById(domain+"FutureBar").style.width=(future/max*100)+"%";
+ document.getElementById(domain+"CurrentValue").textContent=current;
+ document.getElementById(domain+"FutureValue").textContent=future;
+}
+
+
+function buildEmailSummary(){
+ const name=(document.getElementById("clientName")?.value||"").trim()||"de klant";
+ const email=(document.getElementById("clientEmail")?.value||"").trim();
+ const goal=document.getElementById("goalSelect")?.value || state.goal;
+ const currentScore=document.getElementById("currentHealthScore")?.textContent||"0";
+ const futureScore=document.getElementById("futureHealthScore")?.textContent||"0";
+ const pointGain=document.getElementById("healthPointGain")?.textContent||"+0 punten";
+ const currentProfile=document.getElementById("currentHealthProfile")?.textContent||"";
+ const futureProfile=document.getElementById("futureHealthProfile")?.textContent||"";
+ const advice=document.getElementById("adviceName")?.textContent||"";
+ const price=document.getElementById("advicePrice")?.textContent||"";
+ const adviceText=document.getElementById("adviceText")?.textContent||"";
+ const minutes=document.getElementById("patternMinutes")?.textContent||"0";
+ const weighted=document.getElementById("weightedMinutes")?.textContent||"0";
+ const strength=document.getElementById("patternStrength")?.textContent||"0";
+ const conditionRating=document.getElementById("conditionRating")?.value||"5";
+ const energyRating=document.getElementById("energyRating")?.value||"5";
+ const sleepRating=document.getElementById("sleepRating")?.value||"5";
+ const healthNotes=(document.getElementById("healthNotes")?.value||"").trim();
+ const sportsBackground=(document.getElementById("sportsBackground")?.value||"").trim();
+ const startDate=document.getElementById("startDate")?.value||"";
+ const selectedReasons=state.reasons.map((reason,index)=>`${reasonLabels[reason]} (${reasonWeight(index,state.reasons.length)}%)`).join(", ");
+ const notes=(document.getElementById("coachNotes")?.value||"").trim();
+ const followup=(document.getElementById("nextStep")?.value||"").trim();
+
+ const subject=`Samenvatting persoonlijk gezondheidsadvies – ${name}`;
+ const body=[
+   `Beste ${name},`,
+   ``,
+   `Bedankt voor de intake bij MORE2BFIT. Hieronder vind je een samenvatting van jouw persoonlijke gezondheidsadvies.`,
+   ``,
+   `JOUW HUIDIGE SITUATIE`,
+   `Gezondheidsscore: ${currentScore}/100`,
+   `Profiel: ${currentProfile}`,
+   `Actieve minuten per week: ${minutes}`,
+   `Gewogen beweegminuten: ${weighted}`,
+   `Krachtmomenten per week: ${strength}`,
+   `Ervaren conditie: ${conditionRating}/10`,
+   `Ervaren energie: ${energyRating}/10`,
+   `Ervaren slaapkwaliteit: ${sleepRating}/10`,
+   ``,
+   `VERWACHTE ONTWIKKELING NA 8–12 WEKEN`,
+   `Verwachte Gezondheidsscore: ${futureScore}/100`,
+   `Verwachte vooruitgang: ${pointGain}`,
+   `Verwacht profiel: ${futureProfile}`,
+   ``,
+   `BELANGRIJKSTE REDENEN`,
+   ...(state.reasons.length ? state.reasons.map((reason,index)=>`  • ${reasonLabels[reason]} (${reasonWeight(index,state.reasons.length)}%)`) : ["  Niet ingevuld"]),
+   sportsBackground ? `` : null,
+   sportsBackground ? `Sportervaring: ${sportsBackground}` : null,
+   healthNotes ? `` : null,
+   healthNotes ? `Blessures / aandachtspunten: ${healthNotes}` : null,
+   ``,
+   `PERSOONLIJK ADVIES`,
+   `${advice}${price ? ` – ${price}` : ""}`,
+   `${adviceText}`,
+   startDate ? `` : null,
+   startDate ? `Gewenste startdatum: ${startDate}` : null,
+   (()=>{const a=getInjuryAdvice();return a.avoid.length?``:null})(),
+   (()=>{const a=getInjuryAdvice();return a.avoid.length?`AANDACHTSPUNTEN BIJ TRAINING`:null})(),
+   (()=>{const a=getInjuryAdvice();return a.avoid.length?`Vermijd:`:null})(),
+   ...getInjuryAdvice().avoid.map(x=>`  • ${x}`),
+   (()=>{const a=getInjuryAdvice();return a.prefer.length?`Juist wel geschikt:`:null})(),
+   ...getInjuryAdvice().prefer.map(x=>`  • ${x}`),
+   (()=>{
+     const pelvic=state.injuries.includes("bekkenklachten_postpartum");
+     const diastasis=state.injuries.includes("diastase_postpartum");
+     if(!pelvic && !diastasis)return null;
+     const texts=[];
+     if(pelvic)texts.push("Bekkenklachten na de bevalling: overleg over doorverwijzing naar een bekkenfysiotherapeut als klachten na ca. 6 weken niet duidelijk verminderen.");
+     if(diastasis)texts.push("Diastase na de bevalling: laat dit beoordelen door een (bekkenbodem)fysiotherapeut voordat hardlopen of springen wordt hervat.");
+     return `\nAANBEVOLEN DOORVERWIJZING\n${texts.join(" ")}`;
+   })(),
+   (()=>{
+     const withProtocol=state.injuries.map(k=>INJURY_LIBRARY[k]).filter(inj=>inj && inj.protocol);
+     if(!withProtocol.length)return null;
+     return `\nBEWEEGPROTOCOL\n` + withProtocol.map(inj=>`${inj.label}:\n${inj.protocol.map((s,i)=>`  ${i+1}. ${s}`).join("\n")}`).join("\n\n");
+   })(),
+   (()=>{const s=buildWeekSchedule();return s.length?``:null})(),
+   (()=>{const s=buildWeekSchedule();return s.length?`VOORGESTELD TRAININGSSCHEMA`:null})(),
+   (()=>{const s=buildWeekSchedule();return s.length?`Richtlijn: ${getRepRangeAdvice().reps} · ${getRepRangeAdvice().sets} · ${getRepRangeAdvice().rest} (niveau: ${state.experience})`:null})(),
+   ...buildWeekSchedule().flatMap(d=>[
+     ``,
+     `Training ${d.day} · ${d.label}`,
+     ...d.groups.flatMap(g=>[
+       `  ${g.label}:`,
+       ...g.exercises.map(ex=>`    • ${formatExerciseGuidance(ex,g.key)}`)
+     ])
+   ]),
+   notes ? `` : null,
+   notes ? `Aanvullende coachnotities:` : null,
+   notes || null,
+   followup ? `` : null,
+   followup ? `Vervolgafspraak: ${followup}` : null,
+   ``,
+   `Deze samenvatting is bedoeld als praktisch advies en is geen medische diagnose.`,
+   ``,
+   `Met sportieve groet,`,
+   `MORE2BFIT`
+ ].filter(v=>v!==null).join("\n");
+
+ return {name,email,subject,body};
+}
+
+function setEmailStatus(message,isError=false){
+ const el=document.getElementById("emailStatus");
+ if(!el)return;
+ el.textContent=message;
+ el.style.color=isError?"#a74632":"#6f6f6f";
+}
+
+function getProfile(score){
+ if(score<30)return "Starter";
+ if(score<55)return "Opbouwer";
+ if(score<75)return "Actief";
+ return "Sportief";
+}
+function getInjuryAdvice(){
+ const avoid=new Set(),prefer=new Set(),notes=[];
+ state.injuries.forEach(key=>{
+   const inj=INJURY_LIBRARY[key];
+   if(!inj)return;
+   inj.avoid.forEach(x=>avoid.add(x));
+   inj.prefer.forEach(x=>prefer.add(x));
+   notes.push(`${inj.label}: ${inj.note}`);
+ });
+ // Vangnet: mocht een item ooit tegelijk in beide lijsten belanden
+ // (bijv. door een nieuwe blessurecategorie), dan wint "vermijd" altijd.
+ avoid.forEach(x=>prefer.delete(x));
+ return {avoid:[...avoid],prefer:[...prefer],notes};
+}
+
+// Praktische trainingsvolgorde: grote, samengestelde spiergroepen eerst,
+// kleine isolatiespieren (armen) en core/cardio als laatste. Dit voorkomt dat
+// bijvoorbeeld armen worden vermoeid vóórdat rug- of borstoefeningen aan bod komen.
+const MUSCLE_ORDER=["benen","bilspieren","rug","borst","schouders","armen","buik","conditie"];
+
+// Elke oefening heeft nu een expliciet niveau (beginner/gemiddeld/gevorderd),
+// gebaseerd op de trainingservaring die daadwerkelijk nodig is om 'm veilig en
+// effectief uit te voeren. Oefeningen die het dichtst bij het gekozen niveau van
+// de klant liggen komen als eerst; verder weg gelegen niveaus vullen aan indien nodig
+// (bijvoorbeeld wanneer blessures een deel van de lijst uitsluiten).
+const LEVEL_ORDER={beginner:0,gemiddeld:1,gevorderd:2};
+
+function getMuscleExercises(){
+ const userLevel=LEVEL_ORDER[state.experience]??1;
+ return state.muscles.map(key=>{
+   const muscle=MUSCLE_LIBRARY[key];
+   if(!muscle)return null;
+   const safe=muscle.exercises.filter(ex=>!ex.conflicts.some(c=>state.injuries.includes(c)));
+   const usable=safe.length?safe:muscle.exercises;
+   const ordered=[...usable].sort((a,b)=>{
+     const da=Math.abs((LEVEL_ORDER[a.level]??1)-userLevel);
+     const db=Math.abs((LEVEL_ORDER[b.level]??1)-userLevel);
+     return da-db;
+   });
+   return {
+     key,label:muscle.label,icon:muscle.icon,
+     exercises:ordered.slice(0,4).map(ex=>ex.name),
+     restricted:safe.length===0
+   };
+ }).filter(Boolean).sort((a,b)=>MUSCLE_ORDER.indexOf(a.key)-MUSCLE_ORDER.indexOf(b.key));
+}
+
+// Rep-ranges gebaseerd op de ACSM Resistance Training Position Stand (2026), de
+// NSCA-trainingsrichtlijnen en de meta-analyse van Rhea et al. (2003) over trainingservaring:
+// onervaren sporters reageren het best op een gematigde belasting (~60-70% 1RM), ervaren
+// sporters kunnen zwaarder en met minder herhalingen trainen. Ook bij een krachtdoel wordt
+// beginners aangeraden eerst met 8-12 reps techniek en basiskracht op te bouwen (ACSM, 2009),
+// vóór wordt overgestapt op zwaardere, lage-reps training.
+const REP_RANGE_LIBRARY={
+ beginner:{
+   strength:{reps:"8-12 reps",sets:"2-3 sets",rest:"60-90 sec rust",note:"Bouw eerst techniek en basiskracht op met een gematigde belasting; zwaardere, lage-reps training volgt zodra dit goed gaat."},
+   muscle:{reps:"8-12 reps",sets:"2-3 sets",rest:"60-90 sec rust",note:"Gematigde belasting met voldoende herhalingen om de bewegingen goed aan te leren."},
+   weight:{reps:"10-15 reps",sets:"2 sets",rest:"45-60 sec rust",note:"Begin licht en bouw techniek op; volume volgt na de eerste weken."},
+   condition:{reps:"12-15 reps",sets:"2 sets",rest:"30-45 sec rust",note:"Rustig opbouwen in zowel belasting als volume."},
+   energy:{reps:"10-15 reps",sets:"2 sets",rest:"45-60 sec rust",note:"Een haalbaar startpunt met de nadruk op consistentie."},
+   health:{reps:"10-15 reps",sets:"2 sets",rest:"45-60 sec rust",note:"Focus op techniek en een veilige, herhaalbare basis."},
+   painfree:{reps:"12-15 reps",sets:"2 sets",rest:"45-60 sec rust",note:"Lage belasting met veel herhalingen voor een gecontroleerde opbouw."},
+   social:{reps:"10-15 reps",sets:"2 sets",rest:"45-60 sec rust",note:"Een haalbaar, herhaalbaar bereik dat ruimte laat voor samen trainen zonder dat de belasting op de voorgrond staat."}
+ },
+ gemiddeld:{
+   strength:{reps:"4-6 reps",sets:"3-4 sets",rest:"2-3 min rust",note:"Minder herhalingen met een zwaardere belasting bouwen maximale kracht op."},
+   muscle:{reps:"8-12 reps",sets:"3 sets",rest:"60-90 sec rust",note:"Dit bereik combineert voldoende trainingsprikkel met een beheersbare belasting voor spieropbouw."},
+   weight:{reps:"10-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Iets hogere herhalingen met kortere rust verhogen de energie-uitgave per training, met behoud van kracht."},
+   condition:{reps:"12-15 reps",sets:"2-3 sets",rest:"30-45 sec rust",note:"Hogere herhalingen met kortere rust trainen vooral het uithoudingsvermogen van de spier."},
+   energy:{reps:"10-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Een gematigd, haalbaar bereik dat niet te zwaar aanvoelt maar wel een duidelijke prikkel geeft."},
+   health:{reps:"10-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Gericht op functionele kracht met een herhaalbare, veilige belasting."},
+   painfree:{reps:"12-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Lagere belasting met meer herhalingen ondersteunt gecontroleerde, pijnvrije opbouw."},
+   social:{reps:"10-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Gericht op een prettig, vol te houden tempo dat goed samen te trainen is, met ruimte voor onderlinge afstemming."}
+ },
+ gevorderd:{
+   strength:{reps:"1-5 reps",sets:"4-5 sets",rest:"3-5 min rust",note:"Zware belasting met periodisering (afwisselend zware en lichtere weken) helpt om vooruitgang te behouden."},
+   muscle:{reps:"6-12 reps",sets:"3-4 sets",rest:"60-90 sec rust",note:"Varieer tussen zwaardere (6-8) en lichtere (10-12) sets voor optimale spiergroei bij meer trainingservaring."},
+   weight:{reps:"8-15 reps",sets:"3 sets",rest:"45-60 sec rust",note:"Meer volume en variatie in belasting voor blijvende progressie."},
+   condition:{reps:"12-20 reps",sets:"3 sets",rest:"30-45 sec rust",note:"Hoger volume voor verdere opbouw van het uithoudingsvermogen."},
+   energy:{reps:"10-15 reps",sets:"3 sets",rest:"45-60 sec rust",note:"Iets meer volume dan bij een gemiddeld niveau, met behoud van haalbaarheid."},
+   health:{reps:"10-15 reps",sets:"3 sets",rest:"45-60 sec rust",note:"Bredere trainingsbasis met iets meer volume."},
+   painfree:{reps:"12-15 reps",sets:"2-3 sets",rest:"45-60 sec rust",note:"Ook bij meer ervaring blijft lagere belasting met gecontroleerde opbouw leidend bij klachten."},
+   social:{reps:"10-15 reps",sets:"3 sets",rest:"45-60 sec rust",note:"Iets meer volume, met behoud van een tempo dat prettig samen te trainen blijft."}
+ }
+};
+const CARDIO_GUIDANCE={
+ strength:"10-15 min, rustige warming-up of afsluiting",
+ muscle:"10-15 min, rustige warming-up of afsluiting",
+ weight:"20-30 min, matig tot stevig tempo",
+ condition:"20-30 min, matig tot stevig tempo",
+ energy:"15-20 min, rustig tot matig tempo",
+ health:"15-20 min, rustig tempo",
+ painfree:"15-20 min, rustig tempo, gecontroleerd opbouwen",
+ social:"20-30 min, gezamenlijk tempo — bijvoorbeeld samen fietsen of wandelen"
+};
+function getRepRangeAdvice(){
+ const level=REP_RANGE_LIBRARY[state.experience]?state.experience:"gemiddeld";
+ return REP_RANGE_LIBRARY[level][getPrimaryGoal()]||REP_RANGE_LIBRARY[level].health;
+}
+function formatExerciseGuidance(exerciseName,muscleKey){
+ if(muscleKey==="conditie"){
+   return `${exerciseName} — ${CARDIO_GUIDANCE[getPrimaryGoal()]||CARDIO_GUIDANCE.health}`;
+ }
+ const r=getRepRangeAdvice();
+ return `${exerciseName} — ${r.reps} × ${r.sets}`;
+}
+
+const UPPER_MUSCLE_KEYS=["borst","rug","schouders","armen"];
+const LOWER_MUSCLE_KEYS=["benen","bilspieren"];
+const FLEX_MUSCLE_KEYS=["buik","conditie"];
+
+// Kiest per dag een net iets andere selectie oefeningen uit de (al op blessures
+// gefilterde) lijst, zodat "Full Body A" en "Full Body B" niet identiek zijn.
+function pickVariant(exercises,variantIndex){
+ if(!exercises.length)return[];
+ const start=variantIndex%exercises.length;
+ const rotated=[...exercises.slice(start),...exercises.slice(0,start)];
+ return rotated.slice(0,2);
+}
+
+function buildFullBodyDays(muscleData,freq){
+ const labels=freq===1?["Full Body"]:freq===2?["Full Body A","Full Body B"]:["Full Body A","Full Body B","Full Body C"];
+ return labels.map((label,i)=>({
+   day:i+1,
+   label,
+   groups:muscleData.map(m=>({key:m.key,label:m.label,exercises:pickVariant(m.exercises,i)}))
+ }));
+}
+
+function buildUpperLowerDays(muscleData,freq){
+ const upper=muscleData.filter(m=>UPPER_MUSCLE_KEYS.includes(m.key));
+ const lower=muscleData.filter(m=>LOWER_MUSCLE_KEYS.includes(m.key));
+ const flex=muscleData.filter(m=>FLEX_MUSCLE_KEYS.includes(m.key));
+ // Val terug op de volledige selectie als er geen boven- of onderlichaam-spiergroep gekozen is,
+ // zodat een upper- of lower-dag nooit leeg blijft.
+ const upperGroups=upper.length?upper:muscleData;
+ const lowerGroups=lower.length?lower:muscleData;
+ const days=[];
+ for(let i=0;i<freq;i++){
+   const isUpper=i%2===0;
+   const variant=Math.floor(i/2);
+   const letter=String.fromCharCode(65+variant);
+   const base=isUpper?upperGroups:lowerGroups;
+   const withFlex=flex.length?[...base,flex[i%flex.length]]:base;
+   days.push({
+     day:i+1,
+     label:`${isUpper?"Upper":"Lower"} ${letter}`,
+     groups:withFlex.map(m=>({key:m.key,label:m.label,exercises:pickVariant(m.exercises,variant)}))
+   });
+ }
+ return days;
+}
+
+function buildWeekSchedule(){
+ const freq=state.frequency===0?2:(state.frequency||2);
+ const muscleData=getMuscleExercises();
+ const source=muscleData.length?muscleData:[
+   {key:"buik",label:MUSCLE_LIBRARY.buik.label,exercises:MUSCLE_LIBRARY.buik.exercises.slice(0,4).map(e=>e.name)},
+   {key:"conditie",label:MUSCLE_LIBRARY.conditie.label,exercises:MUSCLE_LIBRARY.conditie.exercises.slice(0,4).map(e=>e.name)}
+ ];
+ if(!source.length)return[];
+ return freq<=3 ? buildFullBodyDays(source,freq) : buildUpperLowerDays(source,freq);
+}
+
+function renderTrainingAdvice(){
+ const injuryAdvice=getInjuryAdvice();
+ const avoidList=document.getElementById("injuryAvoidList");
+ const preferList=document.getElementById("injuryPreferList");
+ if(avoidList)avoidList.innerHTML=injuryAdvice.avoid.map(x=>`<li>${x}</li>`).join("");
+ if(preferList)preferList.innerHTML=injuryAdvice.prefer.map(x=>`<li>${x}</li>`).join("");
+ const avoidEmpty=document.getElementById("injuryAvoidEmpty");
+ const preferEmpty=document.getElementById("injuryPreferEmpty");
+ if(avoidEmpty)avoidEmpty.style.display=injuryAdvice.avoid.length?"none":"block";
+ if(preferEmpty)preferEmpty.style.display=injuryAdvice.prefer.length?"none":"block";
+
+ const referralNote=document.getElementById("postpartumReferralNote");
+ const referralText=document.getElementById("postpartumReferralText");
+ const hasPelvic=state.injuries.includes("bekkenklachten_postpartum");
+ const hasDiastasis=state.injuries.includes("diastase_postpartum");
+ if(referralNote){
+   if(hasPelvic || hasDiastasis){
+     referralNote.style.display="block";
+     const texts=[];
+     if(hasPelvic)texts.push("Bij bekkenklachten na de bevalling: neem dit gesprek als moment om te vragen of er al contact is geweest met een bekkenfysiotherapeut, zeker als de klachten na circa 6 weken nog niet duidelijk verminderen.");
+     if(hasDiastasis)texts.push("Bij diastase na de bevalling: adviseer een beoordeling door een (bekkenbodem)fysiotherapeut, en wacht met hardlopen of springen tot die vrijgave er is — ongeacht hoe goed de intake-oefeningen voelen.");
+     if(referralText)referralText.textContent=texts.join(" ");
+   }else{
+     referralNote.style.display="none";
+   }
+ }
+
+ const protocolSection=document.getElementById("protocolSection");
+ if(protocolSection){
+   const withProtocol=state.injuries.map(k=>INJURY_LIBRARY[k]).filter(inj=>inj && inj.protocol);
+   if(withProtocol.length){
+     protocolSection.style.display="block";
+     protocolSection.innerHTML=withProtocol.map(inj=>`
+       <div class="protocol-card">
+         <b><i class="ph ph-list-numbers"></i> Beweegprotocol: ${inj.label}</b>
+         <ol>${inj.protocol.map(step=>`<li>${step}</li>`).join("")}</ol>
+       </div>
+     `).join("");
+   }else{
+     protocolSection.style.display="none";
+     protocolSection.innerHTML="";
+   }
+ }
+
+ const muscleData=getMuscleExercises();
+ const muscleGrid=document.getElementById("muscleAdviceGrid");
+ const muscleEmpty=document.getElementById("muscleAdviceEmpty");
+ if(muscleGrid){
+   muscleGrid.innerHTML=muscleData.map(m=>`
+     <div class="muscle-advice-card">
+       <b><i class="ph ${m.icon}"></i> ${m.label}</b>
+       ${m.restricted?`<small style="display:block;margin:0 0 8px;color:var(--orange-dark);font-size:11px;font-weight:700">Geen van de standaardoefeningen is zonder aanpassing geschikt bij de opgegeven blessures. Overleg met de trainer:</small>`:""}
+       <ul>${m.exercises.map(ex=>`<li>${ex}</li>`).join("")}</ul>
+     </div>
+   `).join("");
+ }
+ if(muscleEmpty)muscleEmpty.style.display=muscleData.length?"none":"block";
+
+ const schedule=buildWeekSchedule();
+ const repRange=getRepRangeAdvice();
+ const repRangeText=document.getElementById("repRangeText");
+ const experienceLabels={beginner:"Beginner",gemiddeld:"Gemiddeld niveau",gevorderd:"Gevorderd niveau"};
+ if(repRangeText)repRangeText.textContent=`${experienceLabels[state.experience]||"Gemiddeld niveau"} · ${repRange.reps} · ${repRange.sets} · ${repRange.rest}. ${repRange.note}`;
+ const scheduleGrid=document.getElementById("weekScheduleGrid");
+ if(scheduleGrid){
+   scheduleGrid.innerHTML=schedule.length?schedule.map(d=>`
+     <div class="week-day-card">
+       <b>Training ${d.day} · ${d.label}</b>
+       ${d.groups.map(g=>`
+         <div class="week-day-group">
+           <strong>${g.label}</strong>
+           <ul>${g.exercises.map(ex=>`<li>${formatExerciseGuidance(ex,g.key)}</li>`).join("")}</ul>
+         </div>
+       `).join("")}
+     </div>
+   `).join("") : `<p class="note">Kies bij Stap 3 een trainingsfrequentie en spiergroepen om hier een weekschema te zien.</p>`;
+ }
+}
+
+function buildVirtuaGymPayload(){
+ const name=(document.getElementById("clientName")?.value||"").trim();
+ const email=(document.getElementById("clientEmail")?.value||"").trim();
+ const birthdate=document.getElementById("clientBirthdate")?.value||"";
+ const age=calcAge(birthdate);
+ const emergencyContact=(document.getElementById("emergencyContact")?.value||"").trim();
+ const healthNotes=(document.getElementById("healthNotes")?.value||"").trim();
+ const injuryAdvice=getInjuryAdvice();
+ const muscleData=getMuscleExercises();
+ const schedule=buildWeekSchedule();
+ return {
+   name,email,age,birthdate,emergencyContact,
+   goal:reasonLabels[state.goal]||goalLabels[state.goal]||state.goal,
+   reasons:state.reasons.map(r=>reasonLabels[r]),
+   frequency:state.frequency,
+   support:state.support,
+   startDate:document.getElementById("startDate")?.value||"",
+   currentHealthScore:document.getElementById("currentHealthScore")?.textContent||"",
+   futureHealthScore:document.getElementById("futureHealthScore")?.textContent||"",
+   healthNotes,
+   injuries:state.injuries,
+   injuryAvoid:injuryAdvice.avoid,
+   injuryPrefer:injuryAdvice.prefer,
+   musclePreferences:muscleData.map(m=>({group:m.label,exercises:m.exercises})),
+   weekSchedule:schedule.map(d=>({day:d.day,groups:d.groups.map(g=>({group:g.label,exercises:g.exercises}))})),
+   coachNotes:(document.getElementById("coachNotes")?.value||"").trim(),
+   nextStep:(document.getElementById("nextStep")?.value||"").trim()
+ };
+}
+
+async function sendToVirtuaGym(){
+ const statusEl=document.getElementById("virtuagymStatus");
+ const setStatus=(msg,isError=false)=>{
+   if(!statusEl)return;
+   statusEl.textContent=msg;
+   statusEl.style.color=isError?"#a74632":"#6f6f6f";
+ };
+ if(!BACKEND_URL){
+   setStatus("Nog niet gekoppeld: vul BACKEND_URL in nadat het serverscript gehost is.",true);
+   return;
+ }
+ const data=buildVirtuaGymPayload();
+ if(!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)){
+   setStatus("Vul eerst een geldig e-mailadres in.",true);
+   document.getElementById("clientEmail")?.focus();
+   return;
+ }
+ if(!document.getElementById("privacyConsent")?.checked){
+   setStatus("Vink eerst de toestemming voor gegevensgebruik aan.",true);
+   document.getElementById("privacyConsent")?.scrollIntoView({behavior:"smooth",block:"center"});
+   return;
+ }
+ setStatus("Bezig met versturen naar VirtuaGym...");
+ try{
+   const response=await fetch(`${BACKEND_URL}/api/submit-intake`,{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify(data)
+   });
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok || result.ok===false){
+     setStatus(result.error||"VirtuaGym gaf een foutmelding terug. Controleer het serverlog.",true);
+     return;
+   }
+   setStatus("Gelukt: gegevens zijn naar VirtuaGym verstuurd.");
+ }catch(err){
+   setStatus("Kon geen verbinding maken met het serverscript.",true);
+ }
+}
+document.getElementById("virtuagymBtn")?.addEventListener("click",sendToVirtuaGym);
+
+let feedbackLog=[];
+try{
+ const savedFeedback=localStorage.getItem("more2bfit_feedback_log");
+ if(savedFeedback)feedbackLog=JSON.parse(savedFeedback);
+}catch(e){}
+
+function persistFeedback(){
+ try{localStorage.setItem("more2bfit_feedback_log",JSON.stringify(feedbackLog));}catch(e){}
+}
+
+function buildFeedbackContext(){
+ const parts=[`doel: ${reasonLabels[getPrimaryGoal()]||getPrimaryGoal()}`];
+ if(state.injuries.length)parts.push(`blessures: ${state.injuries.map(k=>INJURY_LIBRARY[k]?.label||k).join(", ")}`);
+ if(state.muscles.length)parts.push(`spiergroepen: ${state.muscles.map(k=>MUSCLE_LIBRARY[k]?.label||k).join(", ")}`);
+ parts.push(`niveau: ${state.experience}`);
+ parts.push(`frequentie: ${state.frequency}x/week`);
+ return parts.join(" | ");
+}
+
+function renderFeedbackList(){
+ const el=document.getElementById("feedbackList");
+ if(!el)return;
+ if(!feedbackLog.length){
+   el.innerHTML=`<p class="note">Nog geen feedback genoteerd.</p>`;
+   return;
+ }
+ el.innerHTML=feedbackLog.map(f=>`
+   <div class="week-day-card" style="margin-bottom:10px">
+     <b>${f.date}</b>
+     <p style="margin:6px 0 0;font-size:12.5px;color:#555;line-height:1.5">${f.text}</p>
+     <p style="margin:6px 0 0;font-size:10.5px;color:#999">Context: ${f.context}</p>
+   </div>
+ `).join("");
+}
+
+document.getElementById("addFeedbackBtn")?.addEventListener("click",()=>{
+ const input=document.getElementById("feedbackInput");
+ const text=(input?.value||"").trim();
+ const status=document.getElementById("feedbackStatus");
+ if(!text){
+   if(status){status.textContent="Vul eerst feedback in.";status.style.color="#a74632";}
+   return;
+ }
+ feedbackLog.unshift({
+   date:new Intl.DateTimeFormat("nl-NL",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date()),
+   text,
+   context:buildFeedbackContext()
+ });
+ persistFeedback();
+ renderFeedbackList();
+ if(input)input.value="";
+ if(status){status.textContent="Toegevoegd aan de lijst.";status.style.color="#6f6f6f";}
+});
+
+document.getElementById("copyFeedbackBtn")?.addEventListener("click",async()=>{
+ const status=document.getElementById("feedbackStatus");
+ if(!feedbackLog.length){
+   if(status){status.textContent="Nog geen feedback om te kopiëren.";status.style.color="#a74632";}
+   return;
+ }
+ const text=feedbackLog.map(f=>`[${f.date}] ${f.text}\nContext: ${f.context}`).join("\n\n");
+ try{
+   await navigator.clipboard.writeText(text);
+   if(status){status.textContent="Alle feedback gekopieerd — plak dit in een gesprek met Claude.";status.style.color="#6f6f6f";}
+ }catch(e){
+   if(status){status.textContent="Kopiëren niet gelukt. Selecteer en kopieer de tekst hieronder handmatig.";status.style.color="#a74632";}
+ }
+});
+
+document.getElementById("clearFeedbackBtn")?.addEventListener("click",()=>{
+ const status=document.getElementById("feedbackStatus");
+ if(!feedbackLog.length)return;
+ if(!confirm("Weet je zeker dat je de hele feedbacklijst wilt wissen? Dit kan niet ongedaan gemaakt worden."))return;
+ feedbackLog=[];
+ persistFeedback();
+ renderFeedbackList();
+ if(status){status.textContent="Lijst gewist.";status.style.color="#6f6f6f";}
+});
+
+function updateAll(){
+ const now=currentMinutes();
+ const f=state.frequency===0?1:state.frequency;
+ const next=Math.max(now,recommendedMinutes());
+ const activityData=getActivityData();
+ const nowStrength=activityData.strengthSessions;
+ const nextStrength=Math.max(nowStrength,Math.min(2,f));
+
+ const currentDomains=calculateHealthDomains(false);
+ const futureDomains=calculateHealthDomains(true);
+ const calculateWeightedHealthScore=(domains)=>{
+   const weighted =
+     (domains.movement/15)*25 +
+     (domains.strength/15)*25 +
+     (domains.condition/15)*25 +
+     (domains.energy/15)*25;
+   return clamp(Math.round(weighted),0,100);
+ };
+ const currentScore=calculateWeightedHealthScore(currentDomains);
+ const futureScore=calculateWeightedHealthScore(futureDomains);
+ const pointGain=Math.max(0,futureScore-currentScore);
+
+ document.getElementById("patternMinutes").textContent=activityData.totalMinutes;
+ document.getElementById("weightedMinutes").textContent=activityData.weighted;
+ document.getElementById("patternStrength").textContent=activityData.strengthSessions;
+
+ document.getElementById("currentHealthScore").textContent=currentScore;
+ document.getElementById("futureHealthScore").textContent=futureScore;
+ document.getElementById("currentHealthProfile").textContent=scoreProfile(currentScore);
+ document.getElementById("futureHealthProfile").textContent=scoreProfile(futureScore);
+ document.getElementById("healthPointGain").textContent=`+${pointGain} punten`;
+
+ ["movement","strength","condition","energy"].forEach(domain=>{
+   setDomain(domain,currentDomains[domain],futureDomains[domain]);
+ });
+
+
+ // Keep legacy values available for print and advice.
+ const scoreValue=document.getElementById("scoreValue");
+ if(scoreValue)scoreValue.textContent=currentScore;
+ const scoreRing=document.getElementById("scoreRing");
+ if(scoreRing)scoreRing.style.setProperty("--score",currentScore);
+ const profileTitle=document.getElementById("profileTitle");
+ if(profileTitle)profileTitle.textContent=scoreProfile(currentScore);
+ const profileText=document.getElementById("profileText");
+ if(profileText)profileText.textContent=`De Gezondheidsscore combineert vier onderdelen. Daardoor blijft vooruitgang meetbaar, zonder dat twee trainingen per week automatisch een perfecte score opleveren.`;
+
+ renderAdvicePriorities();
+ renderTrainingAdvice();
+ 
+ const rec=recommendation();
+ document.getElementById("adviceName").textContent=rec.name;
+ document.getElementById("advicePrice").textContent=rec.price;
+ const selectedReasonText=state.reasons.length
+   ? state.reasons.map((reason,index)=>`${reasonWeight(index,state.reasons.length)}% ${reasonLabels[reason].toLowerCase()}`).join(", ")
+   : "";
+ document.getElementById("adviceText").textContent=selectedReasonText
+   ? `Jouw plan is opgebouwd rond ${selectedReasonText}. De trainingsvorm en begeleiding worden daarop afgestemd.`
+   : rec.text;
+ const reasons=[
+   `Sluit aan bij ${state.frequency===0?"een wisselende agenda":f+" haalbare training(en) per week"}.`,
+   `Past bij het doel: ${(reasonLabels[getPrimaryGoal()]||goalLabels[state.goal]).toLowerCase()}.`,
+   state.support==="personal"?"De klant heeft behoefte aan vaste persoonlijke begeleiding.":"De begeleidingsvorm sluit aan bij de voorkeur van de klant.",
+   now<120?"Vergroot de huidige wekelijkse beweegprikkel duidelijk.":"Bouwt voort op een al aanwezige beweegbasis."
+ ];
+ document.getElementById("reasonList").innerHTML=reasons.map(r=>`<div class="reason"><i class="ph ph-check-circle"></i><span>${r}</span></div>`).join("");
+}
+// Hergebruikt dezelfde (al goed vormgegeven) printverslag-opmaak, maar rendert die
+// via html2canvas + jsPDF naar een direct downloadbaar PDF-bestand — geen printvenster nodig.
+// De .print-* stijlen staan normaal alleen binnen @media print; hieronder worden ze
+// tijdelijk zonder die media-restrictie toegepast zodat html2canvas ze ook buiten het
+// printvenster om correct kan tekenen.
+// Bouwt de PDF met jsPDF's eigen tekst/lijn-commando's op basis van dezelfde gegevens
+// die ook het printverslag vullen (via preparePrintData), in plaats van de HTML-opmaak
+// om te zetten naar een afbeelding. Dat laatste bleek onbetrouwbaar: jsPDF rendert de
+// HTML in een verborgen iframe waar de opmaak niet altijd goed doorkomt (soms lege pagina's).
+// Tekst rechtstreeks tekenen werkt overal hetzelfde en is dus veel robuuster.
+function downloadSummaryPDF(){
+ const status=document.getElementById("pdfStatus");
+ const setStatus=(msg,isError=false)=>{
+   if(!status)return;
+   status.textContent=msg;
+   status.style.color=isError?"#a74632":"#6f6f6f";
+ };
+ if(!window.jspdf){
+   setStatus("PDF-bibliotheek kon niet laden (mogelijk geen internetverbinding). Gebruik anders 'Print intakeverslag'.",true);
+   return;
+ }
+ preparePrintData();
+ setStatus("PDF wordt gegenereerd...");
+
+ try{
+   const { jsPDF }=window.jspdf;
+   const doc=new jsPDF({unit:"pt",format:"a4"});
+   const pageWidth=595.28,pageHeight=841.89,margin=44,contentWidth=pageWidth-margin*2;
+   const orange=[244,123,32],orangeDark=[216,98,14],anthracite=[63,64,63],text=[71,71,71],muted=[150,150,150],line=[232,232,229];
+   let y=margin;
+
+   function ensureSpace(needed){
+     if(y+needed>pageHeight-margin){doc.addPage();y=margin;}
+   }
+   function heading(str){
+     ensureSpace(30);
+     doc.setFont("helvetica","bold");doc.setFontSize(13);doc.setTextColor(...anthracite);
+     doc.text(str,margin,y);
+     y+=7;
+     doc.setDrawColor(...line);doc.setLineWidth(0.75);
+     doc.line(margin,y,pageWidth-margin,y);
+     y+=16;
+   }
+   function label(str,value){
+     if(!value)return;
+     ensureSpace(26);
+     doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...orangeDark);
+     doc.text(str.toUpperCase(),margin,y);
+     y+=11;
+     doc.setFont("helvetica","normal");doc.setFontSize(10.5);doc.setTextColor(...text);
+     const lines=doc.splitTextToSize(String(value),contentWidth);
+     lines.forEach(l=>{ensureSpace(13);doc.text(l,margin,y);y+=13;});
+     y+=6;
+   }
+   function paragraph(str,opts={}){
+     if(!str)return;
+     doc.setFont("helvetica",opts.bold?"bold":"normal");
+     doc.setFontSize(opts.size||10);
+     doc.setTextColor(...(opts.color||text));
+     const lines=doc.splitTextToSize(String(str),contentWidth);
+     lines.forEach(l=>{ensureSpace(13);doc.text(l,margin,y);y+=13;});
+     y+=opts.gap??6;
+   }
+   function bullets(items,opts={}){
+     if(!items||!items.length)return;
+     doc.setFont("helvetica","normal");doc.setFontSize(opts.size||10);doc.setTextColor(...(opts.color||text));
+     items.forEach(item=>{
+       const lines=doc.splitTextToSize(String(item),contentWidth-14);
+       lines.forEach((l,i)=>{
+         ensureSpace(13);
+         doc.text(i===0?`•  ${l}`:`   ${l}`,margin,y);
+         y+=13;
+       });
+     });
+     y+=6;
+   }
+
+   // Kop
+   doc.setFont("helvetica","bold");doc.setFontSize(20);
+   doc.setTextColor(...anthracite);doc.text("MORE",margin,y);
+   const w1=doc.getTextWidth("MORE");
+   doc.setTextColor(...orange);doc.text("2B",margin+w1,y);
+   const w2=doc.getTextWidth("2B");
+   doc.setTextColor(...anthracite);doc.text("FIT",margin+w1+w2,y);
+   doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...muted);
+   doc.text(document.getElementById("printDate").textContent,pageWidth-margin,y,{align:"right"});
+   y+=10;
+   doc.setDrawColor(...orange);doc.setLineWidth(1.5);
+   doc.line(margin,y,pageWidth-margin,y);
+   y+=26;
+   doc.setFont("helvetica","bold");doc.setFontSize(16);doc.setTextColor(...anthracite);
+   doc.text("Persoonlijk intakeverslag",margin,y);
+   y+=24;
+
+   const val=id=>document.getElementById(id)?.textContent?.trim();
+
+   heading("Klant en beweegprofiel");
+   label("Klant",val("pName"));
+   label("Leeftijd",val("pAge"));
+   label("Beweegprofiel",`${val("pProfile")} — ${val("pScore")}`);
+   label("Huidig patroon",`${val("pCurrent")}, ${val("pCurrentStrength")}`);
+   label("Nieuw patroon",`${val("pNew")}, ${val("pNewStrength")}`);
+
+   heading("Gezondheid en achtergrond");
+   label("Blessures / medische aandachtspunten",val("pHealthNotes"));
+   label("Sportervaring",val("pSportsBackground"));
+   label("Voedingspatroon",val("pNutrition"));
+   label("Slaapkwaliteit",val("pSleep"));
+
+   heading("Praktische gegevens");
+   label("Noodcontact",val("pEmergencyContact"));
+   label("Gewenste startdatum",val("pStartDate"));
+
+   heading("Hulpvraag en motivatie");
+   label("Belangrijkste doel",val("pGoal"));
+   label("Wat je over zes maanden bereikt wilt hebben",val("pSixMonth"));
+   label("Waarom dit belangrijk is",val("pConfidence"));
+   label("Motivatie",val("pMotivation"));
+
+   heading("Persoonlijk advies");
+   label("Advies",val("pAdvice"));
+   paragraph(val("pAdviceText"));
+
+   const injuryAdvice=getInjuryAdvice();
+   if(injuryAdvice.avoid.length || injuryAdvice.prefer.length){
+     heading("Trainingsadvies op basis van blessures");
+     if(injuryAdvice.avoid.length){
+       paragraph("Vermijd:",{bold:true,size:9,color:orangeDark,gap:2});
+       bullets(injuryAdvice.avoid);
+     }
+     if(injuryAdvice.prefer.length){
+       paragraph("Juist wel geschikt:",{bold:true,size:9,color:anthracite,gap:2});
+       bullets(injuryAdvice.prefer);
+     }
+     const pelvic=state.injuries.includes("bekkenklachten_postpartum");
+     const diastasis=state.injuries.includes("diastase_postpartum");
+     if(pelvic||diastasis){
+       const texts=[];
+       if(pelvic)texts.push("Bekkenklachten na de bevalling: overleg over doorverwijzing naar een bekkenfysiotherapeut als klachten na ca. 6 weken niet duidelijk verminderen.");
+       if(diastasis)texts.push("Diastase na de bevalling: laat dit beoordelen door een (bekkenbodem)fysiotherapeut voordat hardlopen of springen wordt hervat.");
+       paragraph("Aanbevolen doorverwijzing:",{bold:true,size:9,gap:2});
+       paragraph(texts.join(" "));
+     }
+   }
+
+   const withProtocol=state.injuries.map(k=>INJURY_LIBRARY[k]).filter(inj=>inj && inj.protocol);
+   if(withProtocol.length){
+     heading("Beweegprotocol");
+     withProtocol.forEach(inj=>{
+       paragraph(inj.label,{bold:true,size:10.5,color:anthracite,gap:3});
+       bullets(inj.protocol.map((s,i)=>`${i+1}. ${s}`));
+     });
+   }
+
+   const schedule=buildWeekSchedule();
+   if(schedule.length){
+     heading("Voorgesteld trainingsschema");
+     const rep=getRepRangeAdvice();
+     const levelLabels={beginner:"Beginner",gemiddeld:"Gemiddeld niveau",gevorderd:"Gevorderd niveau"};
+     paragraph(`Richtlijn (${levelLabels[state.experience]||"Gemiddeld niveau"}): ${rep.reps} · ${rep.sets} · ${rep.rest}`,{bold:true,size:9.5,gap:10});
+     schedule.forEach(d=>{
+       paragraph(`Training ${d.day} · ${d.label}`,{bold:true,size:11,color:anthracite,gap:4});
+       d.groups.forEach(g=>{
+         paragraph(g.label,{bold:true,size:9.5,color:orangeDark,gap:2});
+         bullets(g.exercises.map(ex=>formatExerciseGuidance(ex,g.key)),{size:9.5});
+       });
+     });
+   }
+
+   heading("Verwachte verandering");
+   label("Extra minuten per week",val("pMinutesGain"));
+   label("Krachtmomenten",val("pStrengthGain"));
+   label("Vaste trainingsmomenten",val("pRoutineGain"));
+   label("Gezondheidsscore",`${val("pScoreGain")} (${val("pScoreComparison")})`);
+
+   const coachNotes=val("pNotes"),nextStep=val("pNext");
+   if((coachNotes && coachNotes!=="Geen coachnotities ingevuld.") || (nextStep && nextStep!=="Nog geen vervolgafspraak vastgelegd.")){
+     heading("Coachnotities");
+     label("Observaties",coachNotes);
+     label("Vervolgafspraak",nextStep);
+   }
+
+   ensureSpace(40);
+   y+=6;
+   doc.setDrawColor(...line);doc.line(margin,y,pageWidth-margin,y);
+   y+=14;
+   paragraph("Dit verslag ondersteunt het intakegesprek en is geen medische diagnose. Bij medische klachten of twijfel blijft overleg met een arts of behandelaar belangrijk.",{size:8,color:muted});
+
+   const clientName=(document.getElementById("clientName")?.value||"intake").trim().replace(/[^a-z0-9]+/gi,"-").toLowerCase()||"intake";
+   doc.save(`MORE2BFIT-samenvatting-${clientName}.pdf`);
+   setStatus("PDF is gedownload.");
+ }catch(err){
+   console.error(err);
+   setStatus("Genereren van de PDF is niet gelukt. Probeer 'Print intakeverslag' als alternatief.",true);
+ }
+}
+
+function preparePrint(){
+ preparePrintData();
+ window.print();
+}
+function preparePrintData(){
+ updateAll();
+ const now=currentMinutes(), f=state.frequency===0?2:state.frequency, next=Math.max(now,recommendedMinutes());
+ const nowStrength=getActivityData().strengthSessions, nextStrength=Math.max(nowStrength,Math.min(2,f));
+ document.getElementById("printDate").textContent=new Intl.DateTimeFormat("nl-NL",{dateStyle:"long"}).format(new Date());
+ document.getElementById("pName").textContent=document.getElementById("clientName").value||"Niet ingevuld";
+ document.getElementById("pAge").textContent=(()=>{
+   const b=document.getElementById("clientBirthdate").value;
+   const age=calcAge(b);
+   return age!==null?`${age} jaar (geboren ${new Intl.DateTimeFormat("nl-NL",{dateStyle:"long"}).format(new Date(b))})`:"Geboortedatum niet ingevuld";
+ })();
+ document.getElementById("pHealthNotes").textContent=document.getElementById("healthNotes").value||"Geen bijzonderheden opgegeven.";
+ document.getElementById("pSportsBackground").textContent=document.getElementById("sportsBackground").value||"Niet ingevuld.";
+ document.getElementById("pNutrition").textContent=document.getElementById("nutritionPattern").selectedOptions[0]?.textContent||"Niet ingevuld.";
+ document.getElementById("pSleep").textContent=`${document.getElementById("sleepRating").value}/10`;
+ document.getElementById("pEmergencyContact").textContent=document.getElementById("emergencyContact").value||"Niet ingevuld.";
+ document.getElementById("pStartDate").textContent=document.getElementById("startDate").value?new Intl.DateTimeFormat("nl-NL",{dateStyle:"long"}).format(new Date(document.getElementById("startDate").value)):"Nog niet vastgelegd.";
+ document.getElementById("pProfile").textContent=document.getElementById("currentHealthProfile").textContent;
+ document.getElementById("pScore").textContent=`Gezondheidsscore ${document.getElementById("currentHealthScore").textContent}/100`;
+ document.getElementById("pCurrent").textContent=`${now} minuten per week`;
+ document.getElementById("pCurrentStrength").textContent=`${nowStrength}× krachttraining`;
+ document.getElementById("pNew").textContent=`${next} minuten per week`;
+ document.getElementById("pNewStrength").textContent=`${nextStrength}× krachttraining`;
+ document.getElementById("pGoal").textContent=reasonLabels[state.goal]||goalLabels[state.goal]||state.goal;
+ document.getElementById("pSixMonth").textContent=document.getElementById("sixMonthGoal").value||"Geen toelichting ingevuld.";
+ document.getElementById("pConfidence").textContent=`Vertrouwen: ${state.confidence}/10`;
+ document.getElementById("pMotivation").textContent=document.getElementById("motivation").value||"Geen toelichting ingevuld.";
+ document.getElementById("pAdvice").textContent=`${document.getElementById("adviceName").textContent} · ${document.getElementById("advicePrice").textContent}`;
+ document.getElementById("pAdviceText").textContent=document.getElementById("adviceText").textContent;
+ const injuryAdvice=getInjuryAdvice();
+ document.getElementById("pInjuryAvoid").innerHTML=injuryAdvice.avoid.length?injuryAdvice.avoid.map(x=>`<li>${x}</li>`).join(""):"<li>Geen blessures aangevinkt.</li>";
+ document.getElementById("pInjuryPrefer").innerHTML=injuryAdvice.prefer.length?injuryAdvice.prefer.map(x=>`<li>${x}</li>`).join(""):"<li>Geen blessures aangevinkt.</li>";
+ (()=>{
+   const el=document.getElementById("pPostpartumReferral");
+   const pelvic=state.injuries.includes("bekkenklachten_postpartum");
+   const diastasis=state.injuries.includes("diastase_postpartum");
+   if(!el)return;
+   if(!pelvic && !diastasis){el.style.display="none";return;}
+   const texts=[];
+   if(pelvic)texts.push("Bekkenklachten na de bevalling: overleg over doorverwijzing naar een bekkenfysiotherapeut als klachten na ca. 6 weken niet duidelijk verminderen.");
+   if(diastasis)texts.push("Diastase na de bevalling: laat dit beoordelen door een (bekkenbodem)fysiotherapeut voordat hardlopen of springen wordt hervat.");
+   el.innerHTML=`<strong>Aanbevolen doorverwijzing:</strong> ${texts.join(" ")}`;
+   el.style.display="block";
+ })();
+ (()=>{
+   const el=document.getElementById("pProtocol");
+   if(!el)return;
+   const withProtocol=state.injuries.map(k=>INJURY_LIBRARY[k]).filter(inj=>inj && inj.protocol);
+   el.innerHTML=withProtocol.map(inj=>`<p><strong>Beweegprotocol — ${inj.label}:</strong></p><ol style="margin:4px 0 10px;padding-left:18px">${inj.protocol.map(s=>`<li>${s}</li>`).join("")}</ol>`).join("");
+ })();
+ const schedule=buildWeekSchedule();
+ const repRangePrint=getRepRangeAdvice();
+ const experienceLabelsPrint={beginner:"Beginner",gemiddeld:"Gemiddeld niveau",gevorderd:"Gevorderd niveau"};
+ document.getElementById("pWeekSchedule").innerHTML=schedule.length
+   ? `<p><em>Richtlijn (${experienceLabelsPrint[state.experience]||"Gemiddeld niveau"}): ${repRangePrint.reps} · ${repRangePrint.sets} · ${repRangePrint.rest}</em></p>` +
+     schedule.map(d=>`
+       <div class="print-schedule-day">
+         <strong>Training ${d.day} · ${d.label}</strong>
+         <div class="print-schedule-groups">
+           ${d.groups.map(g=>`
+             <div class="print-schedule-group">
+               <b>${g.label}</b>
+               <ul>${g.exercises.map(ex=>`<li>${formatExerciseGuidance(ex,g.key)}</li>`).join("")}</ul>
+             </div>
+           `).join("")}
+         </div>
+       </div>
+     `).join("")
+   : "<p>Nog geen spiergroepen of frequentie gekozen.</p>";
+ document.getElementById("pMinutesGain").textContent=`${Math.max(0,next-now)} extra minuten`;
+ document.getElementById("pStrengthGain").textContent=`${nextStrength}× kracht`;
+ document.getElementById("pRoutineGain").textContent=`${f} vaste momenten`;
+ document.getElementById("pScoreGain").textContent=document.getElementById("healthPointGain").textContent;
+ document.getElementById("pScoreComparison").textContent=`${document.getElementById("currentHealthScore").textContent}/100 → ${document.getElementById("futureHealthScore").textContent}/100`;
+ document.getElementById("pNotes").textContent=document.getElementById("coachNotes").value||"Geen coachnotities ingevuld.";
+ document.getElementById("pNext").textContent=document.getElementById("nextStep").value||"Nog geen vervolgafspraak vastgelegd.";
+}
+function resetIntake(){location.reload()}
+document.querySelectorAll(".activity-row[data-activity] input, .activity-row[data-activity] select").forEach(el=>{
+ el.addEventListener("input",updateAll);
+ el.addEventListener("change",updateAll);
+});
+["sittingHours","weekLoad"].forEach(id=>{
+ const el=document.getElementById(id);
+ el.addEventListener("input",updateAll);
+ el.addEventListener("change",updateAll);
+});
+
+
+
+document.querySelectorAll(".reason-choice").forEach(btn=>{
+ btn.addEventListener("click",()=>{
+   const reason=btn.dataset.reason;
+   const index=state.reasons.indexOf(reason);
+   if(index>-1){
+     state.reasons.splice(index,1);
+   }else if(state.reasons.length<3){
+     state.reasons.push(reason);
+   }else{
+     const msg=document.getElementById("reasonLimitMessage");
+     if(msg)msg.textContent="Je kunt maximaal drie belangrijke redenen kiezen.";
+     return;
+   }
+   state.goal=getPrimaryGoal();
+   updateReasonChoices();
+   updateAll();
+ });
+});
+
+document.querySelectorAll(".injury-choice").forEach(btn=>{
+ btn.addEventListener("click",()=>{
+   const key=btn.dataset.injury;
+   const idx=state.injuries.indexOf(key);
+   if(idx>-1){
+     state.injuries.splice(idx,1);
+     btn.classList.remove("selected");
+   }else{
+     state.injuries.push(key);
+     btn.classList.add("selected");
+   }
+   updateAll();
+ });
+});
+
+document.querySelectorAll(".muscle-choice").forEach(btn=>{
+ btn.addEventListener("click",()=>{
+   const key=btn.dataset.muscle;
+   const idx=state.muscles.indexOf(key);
+   const msg=document.getElementById("muscleLimitMessage");
+   if(idx>-1){
+     state.muscles.splice(idx,1);
+     btn.classList.remove("selected");
+   }else if(state.muscles.length<4){
+     state.muscles.push(key);
+     btn.classList.add("selected");
+   }else{
+     if(msg)msg.textContent="Je kunt maximaal vier spiergroepen kiezen.";
+     return;
+   }
+   if(msg)msg.textContent=state.muscles.length===4?"Je hebt vier spiergroepen gekozen. Klik op een keuze om deze te verwijderen.":"";
+   updateAll();
+ });
+});
+
+["conditionRating","energyRating","sleepRating"].forEach(id=>{
+ const input=document.getElementById(id);
+ const output=document.getElementById(id+"Value");
+ input?.addEventListener("input",()=>{
+   if(output)output.textContent=input.value;
+   updateAll();
+ });
+});
+
+document.getElementById("copySummaryBtn")?.addEventListener("click",async()=>{
+ const data=buildEmailSummary();
+ try{
+   await navigator.clipboard.writeText(data.body);
+   setEmailStatus("De samenvatting is gekopieerd.");
+ }catch(err){
+   setEmailStatus("Kopiëren lukte niet automatisch. Selecteer de tekst via de e-mailknop.",true);
+ }
+});
+
+buildScales();setupChoices();setupJump();updateReasonChoices();updateAll();renderFeedbackList();
+</script>
+</body>
+</html>

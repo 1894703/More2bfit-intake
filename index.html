@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MORE2BFIT — Tools</title>
+<meta name="description" content="Kies een tool van MORE2BFIT" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --orange: #F58220;
+    --ink: #222222;
+    --paper: #FAFAFA;
+    --paper-card: #FFFFFF;
+    --line: #E5E1DA;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 720px;
+  }
+  .brand {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .brand h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 2rem;
+    margin: 0 0 8px;
+  }
+  .brand p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+  a.card {
+    display: block;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  a.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+  .card .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0 0 6px;
+  }
+  .card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.4;
+  }
+  .card .go {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--orange);
+  }
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: #999;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand">
+      <h1>MORE2BFIT</h1>
+      <p>Kies een tool om te openen</p>
+    </div>
+    <div class="cards">
+      <a class="card" href="./calorieboek.html">
+        <div class="icon">C</div>
+        <h2>Caloriecalculator</h2>
+        <p>Bereken je dagelijkse caloriedoel voor gezond en haalbaar afvallen.</p>
+        <div class="go">Openen →</div>
+      </a>
+      <a class="card" href="./intake.html">
+        <div class="icon">B</div>
+        <h2>Beweegscan (intake)</h2>
+        <p>Intaketool voor gebruik door medewerkers, face-to-face met leden.</p>
+        <div class="go">Openen →</div>
+      </a>
+    </div>
+    <footer>MORE2BFIT · De Kamp 5, 5855 EG Well</footer>
+  </div>
+</body>
+</html>
